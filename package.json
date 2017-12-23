@@ -1,0 +1,71 @@
+{
+  "name": "hiflow",
+  "version": "0.0.1",
+  "description": "Giflow tooling",
+  "main": "lib/index.js",
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  },
+  "files": [
+    "lib",
+    "src"
+  ],
+  "keywords": [
+    "gitflow",
+    "jira",
+    "bitbucket"
+  ],
+  "author": "Billy Montgomery billy.montgomery@gmail.com",
+  "dependencies": {
+    "axios": "^0.16.2",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "chalk": "^2.3.0",
+    "inquirer": "^4.0.0",
+    "inquirer-chalk-pipe": "^1.2.0",
+    "lodash": "^4.17.4",
+    "node-jira": "^0.2.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-eslint": "^7.2.3",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-export-extensions": "^6.22.0",
+    "babel-plugin-transform-object-rest-spread": "^6.23.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-es2016": "^6.24.1",
+    "babel-preset-es2017": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "chai": "^3.5.0",
+    "cross-env": "^4.0.0",
+    "enzyme": "^2.9.1",
+    "eslint": "^3.6.0",
+    "eslint-config-airbnb": "^13.0.0",
+    "eslint-plugin-flowtype": "^2.32.1",
+    "eslint-plugin-import": "^2.0.0",
+    "eslint-plugin-jsx-a11y": "^2.2.3",
+    "eslint-plugin-mocha": "^4.9.0",
+    "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-react": "^6.10.3",
+    "eslint-plugin-standard": "^3.0.1",
+    "flow-bin": "^0.45.0",
+    "jsdom": "^11.2.0",
+    "mocha": "^3.3.0",
+    "mocha-jsdom": "^1.1.0",
+    "rimraf": "^2.6.1"
+  },
+  "scripts": {
+    "clean": "rimraf lib",
+    "test": "cross-env BABEL_ENV=commonjs mocha --compilers js:babel-register --recursive",
+    "test:watch": "npm test -- --watch",
+    "test:examples": "node examples/",
+    "cover": "cross-env BABEL_ENV=commonjs istanbul cover _mocha -- --compilers js:babel-register --recursive",
+    "lint": "eslint src test --fix",
+    "lint:fix": "npm run lint -- --fix",
+    "build": "cross-env BABEL_ENV=commonjs babel src --out-dir lib --source-maps",
+    "flow": "flow",
+    "prepublish": "npm run clean && npm run lint && npm run build && npm run test"
+  },
+  "license": "MIT"
+}
