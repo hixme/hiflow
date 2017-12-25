@@ -14,7 +14,6 @@ export const {
   verbose: VERBOSE2,
   v: VERBOSE1,
   reviewer,
-  token: argToken,
   ...args
 } = argv
 
