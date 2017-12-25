@@ -32,8 +32,18 @@ export async function promptPullRequestList() {
 
     return inquirer.prompt({
       type: 'list',
-      name: 'pull-request-list',
-      choices: response.data.values.map(({ state, id, title }) => `(${state}) #${id} ${title}`),
+      name: 'pullrequest',
+      choices: response.data.values.map(({ author, state, id, title, source, ...pr }) => ({
+        name: `(${state}) #${id} by ${author.display_name} - ${title}`,
+        value: {
+          author,
+          id,
+          title,
+          branch: source.branch.name,
+          source,
+          ...pr
+        },
+      })),
       message: 'Select a pull request?',
       validate: val => !!val,
       when: () => true,
