@@ -18,7 +18,13 @@ export function getRepositoryRemoteURL() {
 }
 
 export function getRepositoryRemoteUsername() {
-  console.log('getRepositoryRemoteURL = ', getRepositoryRemoteURL())
   return getRepositoryRemoteURL().split(':')[1].split('/')[0]
 }
 
+export function refreshRepo() {
+  return execSync('git pull origin')
+}
+
+export function checkoutBranch(branchName) {
+  return execSync(`git checkout ${branchName}`)
+}
