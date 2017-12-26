@@ -9,7 +9,7 @@ switch (command) {
   case 'config':
     runSetup()
     break
-  case 'prs':
+  case 'pr':
     promptPullRequestList()
       .then((res) => {
         return res.action()
