@@ -12,6 +12,7 @@ import {
 const BITBUCKET_TOKEN = getBitbucketToken()
 const GIT_REPO_NAME = getRepositoryName()
 const GIT_REPO_ORIGIN_USERNAME = getRepositoryRemoteUsername()
+const BITBUCKET_API_BASEURL = `https://bitbucket.org/!api/2.0/repositories/${GIT_REPO_ORIGIN_USERNAME}/${GIT_REPO_NAME}`
 
 function bitbucketRequest(url, params = {}, method) {
   return axios({
@@ -24,8 +25,21 @@ function bitbucketRequest(url, params = {}, method) {
     },
   })
 }
+
+function buildAPIUrl(path) {
+  return `${BITBUCKET_API_BASEURL}/${path}`
+}
+
 export function getPullRequests() {
-  return bitbucketRequest(`https://bitbucket.org/!api/2.0/repositories/${GIT_REPO_ORIGIN_USERNAME}/${GIT_REPO_NAME}/pullrequests`)
+  return bitbucketRequest(buildAPIUrl(`pullrequests`))
+}
+
+export function createPullRequest(data) {
+  return bitbucketRequest(buildAPIUrl('pullrequests'), data, 'POST')
+}
+
+export function getRepository() {
+  return bitbucketRequest(BITBUCKET_API_BASEURL)
 }
 
 function getPullRequestActions(pr) {
