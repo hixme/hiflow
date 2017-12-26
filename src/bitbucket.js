@@ -30,7 +30,7 @@ export function getPullRequests() {
 
 function getPullRequestActions(pr) {
   return {
-    checkout: () => checkoutBranch(pr.source.branch.name),
+    checkout: () => refreshRepo && checkoutBranch(pr.source.branch.name),
     approve: async () => await bitbucketRequest(pr.links.approve.href, {}, 'post'),
     decline: async () => await bitbucketRequest(pr.links.decline.href, {}, 'post'),
     // activity: async () => await bitbucketRequest(pr.links.activity.href),

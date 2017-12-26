@@ -28,7 +28,7 @@ export function getRepositoryName() {
 }
 
 export function refreshRepo() {
-  return execSync('git pull origin')
+  return execSync('git fetch')
 }
 
 export function checkoutBranch(branchName) {
