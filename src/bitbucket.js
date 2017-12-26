@@ -1,10 +1,13 @@
 import axios from 'axios'
 import inquirer from 'inquirer'
+import chalk from 'chalk'
+
 import { HOME } from './args'
 import { getBitbucketToken } from './config'
 import {
   getRepositoryName,
   getRepositoryRemoteUsername,
+  getRepositoryBranch,
   refreshRepo,
   checkoutBranch,
 } from './git-info'
@@ -51,9 +54,92 @@ function getPullRequestActions(pr) {
     merge: async () => await bitbucketRequest(pr.links.merge.href, {}, 'post'),
   }
 }
-export async function promptPullRequestList() {
+
+function promptCreatePullRequest() {
+  const currentBranch = getRepositoryBranch()
+
+  const prObj = {
+    source: { branch: { name: currentBranch, }, },
+    title: '',
+    description: '',
+    reviewers: [],
+  }
+
+  return inquirer.prompt({
+      type: 'confirm',
+      name: 'createpr',
+      message: `Would you like to create a pull request for your branch ${currentBranch}?`,
+      validate: val => !!val,
+      filter: val => val.trim(),
+      when: () => true,
+    })
+    .then(({ createpr }) => {
+      if (createpr) {
+        return getRepository()
+      }
+    })
+    .then((res) => {
+      if (res) {
+        return inquirer.prompt([
+          {
+            type: 'input',
+            name: 'destination',
+            message: 'What branch should this pull request merge into?',
+            default: res.data.mainbranch.name,
+            validate: val => !!val,
+            filter: val => val.trim(),
+            when: () => true,
+          },
+          {
+            type: 'input',
+            name: 'title',
+            message: 'Add pull request title?',
+            default: currentBranch,
+            validate: val => !!val,
+            filter: val => val.trim(),
+            when: () => true,
+          },
+          {
+            type: 'input',
+            name: 'description',
+            message: 'Add pull request description?',
+            validate: val => !!val,
+            filter: val => val.trim(),
+            when: () => true,
+          },
+          {
+            type: 'input',
+            name: 'reviewers',
+            message: 'Add reviewers? (Enter usernames as csv)',
+          }
+        ])
+        .then(({
+          destination,
+          title,
+          description,
+          reviewers,
+        }) => createPullRequest({
+          ...prObj,
+          destination: { branch: { name: destination } },
+          title,
+          description,
+          reviewers: reviewers ?
+            reviewers.split(',').map(i => { username: i.trim() }) : [],
+        }))
+        .then(res => {
+          return { action: () => console.log(chalk.green('Pull request created!')) }
+        })
+      }
+    })
+}
+
+export async function promptPullRequestList(create) {
   try {
-  const response = await getPullRequests()
+    if (create) {
+      return promptCreatePullRequest()
+    }
+
+    const response = await getPullRequests()
     if (response.data.values.length === 0) {
       return console.log('No pull requests found')
     }
