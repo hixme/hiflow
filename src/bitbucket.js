@@ -52,7 +52,7 @@ export async function promptPullRequestList() {
         choices: response.data.values.map(({ author, state, id, title, ...pr }) => ({
           name: `(${state}) #${id} by ${author.display_name} - ${title}`,
           value: {
-            actions: getPullRequestActions(pr),
+            actions: getPullRequestActions({ author, state, id, title, ...pr }),
             author,
             id,
             title,
