@@ -15,7 +15,6 @@ function formatConfigForSave(configJSON = {}) {
       memo.push(`${curr.trim()}=${configJSON[curr].trim()}`)
       return memo
     }, [])
-    .sort()
     .join('\n')
 }
 
