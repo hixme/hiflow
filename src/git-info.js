@@ -1,15 +1,15 @@
 const execSync = require('child_process').execSync
 
 export function getRepositoryVersion() {
-  return execSync('git describe --tags --abbrev=0', { encoding: 'utf8' })
+  return execSync('git describe --tags --abbrev=0', { encoding: 'utf8' }).trim()
 }
 
 export function getRepositoryBranch() {
-  return execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' })
+  return execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim()
 }
 
 export function getRepositoryRemoteURL() {
-  return execSync('git config --get remote.origin.url', { encoding: 'utf8' })
+  return execSync('git config --get remote.origin.url', { encoding: 'utf8' }).trim()
 }
 
 export function getRepositoryRemoteUsername() {

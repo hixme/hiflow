@@ -1,7 +1,7 @@
 {
   "name": "hiflow",
   "version": "0.1.1",
-  "description": "Giflow tooling",
+  "description": "A pull request and gitflow management tool",
   "main": "lib/index.js",
   "directories": {
     "example": "examples",
