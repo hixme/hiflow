@@ -2,7 +2,12 @@ import axios from 'axios'
 import inquirer from 'inquirer'
 import { HOME } from './args'
 import { getBitbucketToken } from './config'
-import { getRepositoryName, getRepositoryRemoteUsername } from './git-info'
+import {
+  getRepositoryName,
+  getRepositoryRemoteUsername,
+  refreshRepo,
+  checkoutBranch,
+} from './git-info'
 
 const BITBUCKET_TOKEN = getBitbucketToken()
 const GIT_REPO_NAME = getRepositoryName()
@@ -23,6 +28,15 @@ export function getPullRequests() {
   return bitbucketRequest(`https://bitbucket.org/!api/2.0/repositories/${GIT_REPO_ORIGIN_USERNAME}/${GIT_REPO_NAME}/pullrequests`)
 }
 
+function getPullRequestActions(pr) {
+  return {
+    checkout: () => refreshRepo() && checkoutBranch(pr.source.branch.name),
+    approve: async () => await bitbucketRequest(pr.links.approve, {}, 'post'),
+    decline: async () => await bitbucketRequest(pr.links.decline, {}, 'post'),
+    activity: async () => await bitbucketRequest(pr.links.activity),
+    merge: async () => await bitbucketRequest(pr.links.merge),
+  }
+}
 export async function promptPullRequestList() {
   try {
   const response = await getPullRequests()
@@ -30,24 +44,35 @@ export async function promptPullRequestList() {
       return console.log('No pull requests found')
     }
 
-    return inquirer.prompt({
-      type: 'list',
-      name: 'pullrequest',
-      choices: response.data.values.map(({ author, state, id, title, source, ...pr }) => ({
-        name: `(${state}) #${id} by ${author.display_name} - ${title}`,
-        value: {
-          author,
-          id,
-          title,
-          branch: source.branch.name,
-          source,
-          ...pr
-        },
-      })),
-      message: 'Select a pull request?',
-      validate: val => !!val,
-      when: () => true,
-    })
+    return inquirer.prompt([
+      {
+        type: 'list',
+        name: 'pullrequest',
+        choices: response.data.values.map(({ author, state, id, title, ...pr }) => ({
+          name: `(${state}) #${id} by ${author.display_name} - ${title}`,
+          value: {
+            actions: getPullRequestActions(pr),
+            author,
+            id,
+            title,
+            ...pr
+          },
+        })),
+        message: 'Select a pull request?',
+        validate: val => !!val,
+        when: () => true,
+      }, {
+        type: 'list',
+        name: 'action',
+        choices: (answers) => Object.keys(answers.pullrequest.actions).map(action => ({
+          name: action,
+          value: answers.pullrequest.actions[action]
+        })),
+        message: 'Select a pull request?',
+        validate: val => !!val,
+        when: () => true,
+      }
+    ])
   } catch (e) {
     console.error(e)
   }
