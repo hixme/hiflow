@@ -13,7 +13,7 @@ export const {
   _,
   verbose: VERBOSE2,
   v: VERBOSE1,
-  reviewer,
+  create,
   ...args
 } = argv
 

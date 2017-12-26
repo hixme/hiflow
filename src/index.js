@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import inquirer from 'inquirer';
 
-import { _, command, args } from './args';
+import { _, command, create, args } from './args';
 import { runSetup } from './config'
 import { promptPullRequestList } from './bitbucket'
 
@@ -10,9 +10,13 @@ switch (command) {
     runSetup()
     break
   case 'pr':
-    promptPullRequestList()
+    promptPullRequestList(create)
       .then((res) => {
-        return res.action()
+        if (res && res.action) {
+          return res.action()
+        }
+
+        return null
       })
       .then((res) => {
         if (res && res.data && res.data.values) {
