@@ -12,7 +12,13 @@ switch (command) {
   case 'prs':
     promptPullRequestList()
       .then((res) => {
-        res.action()
+        return res.action()
       })
+      .then((res) => {
+        if (res && res.data && res.data.values) {
+          res.data.values.map(console.log)
+        }
+      })
+      .catch(console.error)
     break
 }
