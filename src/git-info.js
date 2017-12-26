@@ -1,9 +1,4 @@
-import asyncExec from './async-exec'
 const execSync = require('child_process').execSync
-
-export function getRepositoryName() {
-  return execSync('basename `git rev-parse --show-toplevel`', { encoding: 'utf8' }).replace('\n', '')
-}
 
 export function getRepositoryVersion() {
   return execSync('git describe --tags --abbrev=0', { encoding: 'utf8' })
@@ -18,7 +13,18 @@ export function getRepositoryRemoteURL() {
 }
 
 export function getRepositoryRemoteUsername() {
-  return getRepositoryRemoteURL().split(':')[1].split('/')[0]
+  const url = getRepositoryRemoteURL()
+
+  if (url.includes('https')) {
+    return url.split('/').reverse()[1].trim()
+  }
+
+  return url.split(':')[1].split('/')[0].trim()
+}
+
+export function getRepositoryName() {
+  return getRepositoryRemoteURL()
+    .split('/').pop().trim().replace('.git', '')
 }
 
 export function refreshRepo() {
