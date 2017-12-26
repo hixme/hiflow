@@ -74,7 +74,7 @@ export async function promptPullRequestList() {
       }
     ])
   } catch (e) {
-    console.error(e)
+    throw e
   }
 }
 
