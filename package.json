@@ -8,7 +8,7 @@
     "test": "test"
   },
   "bin": {
-    "hf": "bin/index.js",
+    "hi": "bin/index.js",
     "hiflow": "bin/index.js"
   },
   "files": [
