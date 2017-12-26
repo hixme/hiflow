@@ -48,7 +48,11 @@ function parseConfig(settings = '') {
 }
 
 export function getConfig() {
-  return parseConfig(getConfigFile()) || {}
+  try {
+    return parseConfig(getConfigFile()) || {}
+  } catch (e) {
+    return {}
+  }
 }
 
 export function promptUserSetup() {
