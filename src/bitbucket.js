@@ -48,6 +48,7 @@ export async function promptPullRequestList() {
       {
         type: 'list',
         name: 'pullrequest',
+        message: 'Select a pull request?',
         choices: response.data.values.map(({ author, state, id, title, ...pr }) => ({
           name: `(${state}) #${id} by ${author.display_name} - ${title}`,
           value: {
@@ -58,17 +59,16 @@ export async function promptPullRequestList() {
             ...pr
           },
         })),
-        message: 'Select a pull request?',
         validate: val => !!val,
         when: () => true,
       }, {
         type: 'list',
         name: 'action',
+        message: 'What action would you like to perform?',
         choices: (answers) => Object.keys(answers.pullrequest.actions).map(action => ({
           name: action,
           value: answers.pullrequest.actions[action]
         })),
-        message: 'Select a pull request?',
         validate: val => !!val,
         when: () => true,
       }
