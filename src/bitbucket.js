@@ -30,11 +30,11 @@ export function getPullRequests() {
 
 function getPullRequestActions(pr) {
   return {
-    checkout: () => refreshRepo() && checkoutBranch(pr.source.branch.name),
-    approve: async () => await bitbucketRequest(pr.links.approve, {}, 'post'),
-    decline: async () => await bitbucketRequest(pr.links.decline, {}, 'post'),
-    activity: async () => await bitbucketRequest(pr.links.activity),
-    merge: async () => await bitbucketRequest(pr.links.merge),
+    checkout: () => checkoutBranch(pr.source.branch.name),
+    approve: async () => await bitbucketRequest(pr.links.approve.href, {}, 'post'),
+    decline: async () => await bitbucketRequest(pr.links.decline.href, {}, 'post'),
+    activity: async () => await bitbucketRequest(pr.links.activity.href),
+    merge: async () => await bitbucketRequest(pr.links.merge.href),
   }
 }
 export async function promptPullRequestList() {
