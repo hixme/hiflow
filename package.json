@@ -1,6 +1,6 @@
 {
   "name": "hiflow",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "description": "Giflow tooling",
   "main": "lib/index.js",
   "directories": {
