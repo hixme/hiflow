@@ -131,8 +131,7 @@ async function promptPullRequestList() {
       return console.log('No pull requests found')
     }
 
-    return inquirer.prompt([
-      {
+    return inquirer.prompt({
         type: 'list',
         name: 'pullrequest',
         message: 'Select a pull request?',
@@ -148,18 +147,23 @@ async function promptPullRequestList() {
         })),
         validate: val => !!val,
         when: () => true,
-      }, {
-        type: 'list',
-        name: 'action',
-        message: 'What action would you like to perform?',
-        choices: (answers) => Object.keys(answers.pullrequest.actions).map(action => ({
-          name: action,
-          value: answers.pullrequest.actions[action]
-        })),
-        validate: val => !!val,
-        when: () => true,
-      }
-    ])
+      })
+      .then(({ pullrequest }) => {
+        // console.log(pullrequest)
+        outputPRSummary(pullrequest)
+
+        return inquirer.prompt({
+          type: 'list',
+          name: 'action',
+          message: 'What action would you like to perform?',
+          choices: () => Object.keys(pullrequest.actions).map(action => ({
+            name: action,
+            value: pullrequest.actions[action]
+          })),
+          validate: val => !!val,
+          when: () => true,
+        })
+    })
     .then((res) => {
       if (res && res.action) {
         return res.action() || true
