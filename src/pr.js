@@ -18,6 +18,15 @@ import {
   checkoutBranch,
 } from './git'
 
+function outputPRSummary(pullrequest) {
+  const { id, title, description, author } = pullrequest || {}
+  console.log(`
+  ${chalk.cyan(`#${pullrequest.id} ${pullrequest.title}`)}
+  by ${author.display_name}
+
+    ${pullrequest.description}
+`)
+}
 
 function getPullRequestActions(pr) {
   return {
@@ -25,7 +34,8 @@ function getPullRequestActions(pr) {
     approve: () => bitbucketRequest(pr.links.approve.href, {}, 'post'),
     decline: () => bitbucketRequest(pr.links.decline.href, {}, 'post'),
     // activity: async () => await bitbucketRequest(pr.links.activity.href),
-    merge: async () => await bitbucketRequest(pr.links.merge.href, {}, 'post'),
+    merge: () => bitbucketRequest(pr.links.merge.href, {}, 'post'),
+    exit: () => {},
   }
 }
 
@@ -77,9 +87,7 @@ function promptCreatePullRequest() {
             type: 'input',
             name: 'description',
             message: 'Add pull request description?',
-            validate: val => !!val,
             filter: val => val.trim(),
-            when: () => true,
           },
           {
             type: 'input',
@@ -102,7 +110,10 @@ function promptCreatePullRequest() {
             reviewers.split(',').map(i => ({ username: i.trim() })) : [],
         }))
         .then(res => {
-          console.log(chalk.cyan('Pull request created!'))
+          console.log(`
+${chalk.green('Pull request created!')}
+${chalk.cyan('==>')} ${res.links.html.href}
+`)
         })
         .catch(error => {
           console.log(error)
@@ -120,8 +131,7 @@ async function promptPullRequestList() {
       return console.log('No pull requests found')
     }
 
-    return inquirer.prompt([
-      {
+    return inquirer.prompt({
         type: 'list',
         name: 'pullrequest',
         message: 'Select a pull request?',
@@ -137,18 +147,23 @@ async function promptPullRequestList() {
         })),
         validate: val => !!val,
         when: () => true,
-      }, {
-        type: 'list',
-        name: 'action',
-        message: 'What action would you like to perform?',
-        choices: (answers) => Object.keys(answers.pullrequest.actions).map(action => ({
-          name: action,
-          value: answers.pullrequest.actions[action]
-        })),
-        validate: val => !!val,
-        when: () => true,
-      }
-    ])
+      })
+      .then(({ pullrequest }) => {
+        // console.log(pullrequest)
+        outputPRSummary(pullrequest)
+
+        return inquirer.prompt({
+          type: 'list',
+          name: 'action',
+          message: 'What action would you like to perform?',
+          choices: () => Object.keys(pullrequest.actions).map(action => ({
+            name: action,
+            value: pullrequest.actions[action]
+          })),
+          validate: val => !!val,
+          when: () => true,
+        })
+    })
     .then((res) => {
       if (res && res.action) {
         return res.action() || true
