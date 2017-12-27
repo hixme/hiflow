@@ -77,9 +77,7 @@ function promptCreatePullRequest() {
             type: 'input',
             name: 'description',
             message: 'Add pull request description?',
-            validate: val => !!val,
             filter: val => val.trim(),
-            when: () => true,
           },
           {
             type: 'input',
