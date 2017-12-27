@@ -26,7 +26,7 @@ function handleError(error) {
   return error.response.data.error
 }
 
-export default function bitbucketRequest(url, params = {}, method) {
+export function bitbucketRequest(url, params = {}, method) {
   return axios({
     url,
     method: method || 'get',
