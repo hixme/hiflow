@@ -1,5 +1,6 @@
 import fs from 'fs'
-import inquirer from 'inquirer';
+import inquirer from 'inquirer'
+import chalk from 'chalk'
 import { HOME } from './args'
 
 export const CONFIG_FILE_PATH = `${HOME}/.hiflow`
@@ -90,6 +91,9 @@ function handlePrompt({username, password}) {
 export function runSetup() {
   return promptUserSetup()
     .then(handlePrompt)
+    .then(() => {
+      console.log(chalk.cyan('Let\'s do this!'))
+    })
     .catch(() => {})
 }
 
