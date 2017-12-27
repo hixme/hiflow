@@ -18,6 +18,15 @@ import {
   checkoutBranch,
 } from './git'
 
+function outputPRSummary(pullrequest) {
+  const { id, title, description, author } = pullrequest || {}
+  console.log(`
+  ${chalk.cyan(`#${pullrequest.id} ${pullrequest.title}`)}
+  by ${author.display_name}
+
+    ${pullrequest.description}
+`)
+}
 
 function getPullRequestActions(pr) {
   return {
