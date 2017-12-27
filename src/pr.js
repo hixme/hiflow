@@ -34,7 +34,8 @@ function getPullRequestActions(pr) {
     approve: () => bitbucketRequest(pr.links.approve.href, {}, 'post'),
     decline: () => bitbucketRequest(pr.links.decline.href, {}, 'post'),
     // activity: async () => await bitbucketRequest(pr.links.activity.href),
-    merge: async () => await bitbucketRequest(pr.links.merge.href, {}, 'post'),
+    merge: () => bitbucketRequest(pr.links.merge.href, {}, 'post'),
+    exit: () => {},
   }
 }
 
