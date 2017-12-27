@@ -8,16 +8,25 @@ import {
   getRepositoryName,
   getRepositoryRemoteUsername,
   getRepositoryBranch,
-  refreshRepo,
-  checkoutBranch,
-} from './git-info'
+} from './git'
 
 const BITBUCKET_TOKEN = getBitbucketToken()
 const GIT_REPO_NAME = getRepositoryName()
 const GIT_REPO_ORIGIN_USERNAME = getRepositoryRemoteUsername()
 const BITBUCKET_API_BASEURL = `https://bitbucket.org/!api/2.0/repositories/${GIT_REPO_ORIGIN_USERNAME}/${GIT_REPO_NAME}`
 
-function bitbucketRequest(url, params = {}, method) {
+function handleResponse(response) {
+  // console.log('data - ', response.data)
+  return response.data
+}
+
+function handleError(error) {
+  // console.log('error - ', JSON.stringify(error.response.data.error))
+  // console.log('error - ', error)
+  return error.response.data.error
+}
+
+export default function bitbucketRequest(url, params = {}, method) {
   return axios({
     url,
     method: method || 'get',
@@ -27,6 +36,8 @@ function bitbucketRequest(url, params = {}, method) {
       Authorization: `Basic ${BITBUCKET_TOKEN}`,
     },
   })
+  .then(handleResponse)
+  .catch(e => Promise.reject(handleError(e)))
 }
 
 function buildAPIUrl(path) {
