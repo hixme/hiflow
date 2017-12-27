@@ -44,8 +44,10 @@ function buildAPIUrl(path) {
   return `${BITBUCKET_API_BASEURL}/${path}`
 }
 
+// TODO: recurse to get all pages of pull requests
 export function getPullRequests() {
   return bitbucketRequest(buildAPIUrl(`pullrequests`))
+    .then(data => data.values)
 }
 
 export function createPullRequest(data) {
