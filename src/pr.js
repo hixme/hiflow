@@ -100,7 +100,10 @@ function promptCreatePullRequest() {
             reviewers.split(',').map(i => ({ username: i.trim() })) : [],
         }))
         .then(res => {
-          console.log(chalk.cyan('Pull request created!'))
+          console.log(`
+${chalk.green('Pull request created!')}
+${chalk.cyan('==>')} ${res.links.html.href}
+`)
         })
         .catch(error => {
           console.log(error)
