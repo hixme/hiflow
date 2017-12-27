@@ -28,9 +28,9 @@ export function getRepositoryName() {
 }
 
 export function refreshRepo() {
-  return execSync('git fetch')
+  return execSync('git fetch', { encoding: 'utf8' })
 }
 
 export function checkoutBranch(branchName) {
-  return execSync(`git checkout ${branchName}`)
+  return execSync(`git checkout ${branchName}`, { encoding: 'utf8' })
 }
