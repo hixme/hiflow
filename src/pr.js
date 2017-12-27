@@ -22,8 +22,8 @@ import {
 function getPullRequestActions(pr) {
   return {
     checkout: () => refreshRepo && checkoutBranch(pr.source.branch.name),
-    approve: async () => await bitbucketRequest(pr.links.approve.href, {}, 'post'),
-    decline: async () => await bitbucketRequest(pr.links.decline.href, {}, 'post'),
+    approve: () => bitbucketRequest(pr.links.approve.href, {}, 'post'),
+    decline: () => bitbucketRequest(pr.links.decline.href, {}, 'post'),
     // activity: async () => await bitbucketRequest(pr.links.activity.href),
     merge: async () => await bitbucketRequest(pr.links.merge.href, {}, 'post'),
   }
