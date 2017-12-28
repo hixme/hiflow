@@ -14,7 +14,7 @@ Run this to setup access to the bitbucket API so you can access your projects
 ```bash
 hi config
 ```
-
+![alt text](https://raw.githubusercontent.com/hixme/hiflow/master/images/config-steps.png "hi config display")
 
 ## hi pr
 
@@ -25,6 +25,8 @@ decline the pull request.
 ```bash
 hi pr
 ```
+
+![alt text](https://raw.githubusercontent.com/hixme/hiflow/master/images/pr-step-2.png "hi pr display")
 
 
 ## hi pr --create
@@ -37,6 +39,9 @@ description, and reviewers.
 hi pr --create
 ```
 
+![alt text](https://raw.githubusercontent.com/hixme/hiflow/master/images/pr-create-steps.png "hi pr create display")
+
+
 ## hi checkout
 
 Hiflow checkout wants help you with your branch naming. Current branch options
@@ -46,3 +51,9 @@ are feature, improvement, fix, and hotfix.
 hi checkout
 
 ```
+
+![alt text](https://raw.githubusercontent.com/hixme/hiflow/master/images/checkout-step-1.png "hi checkout display")
+
+![alt text](https://raw.githubusercontent.com/hixme/hiflow/master/images/checkout-step-2.png "hi checkout display")
+
+![alt text](https://raw.githubusercontent.com/hixme/hiflow/master/images/checkout-step-3.png "hi checkout display")
