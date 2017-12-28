@@ -20,13 +20,18 @@ import {
   checkoutBranch,
 } from './git'
 
+const CURRENT_USERNAME = getConfig().BITBUCKET_USERNAME
+function outputPRLink(link) {
+  console.log(`${chalk.cyan('==>')} ${link}`)
+}
+
 function outputPRSummary(pullrequest) {
   const { id, title, description, author } = pullrequest || {}
   console.log(`
-  ${chalk.cyan(`#${pullrequest.id} ${pullrequest.title}`)}
-  by ${author.display_name}
-
-    ${pullrequest.description}
+${chalk.cyan(`#${pullrequest.id} ${pullrequest.title}`)}
+Author: ${author.display_name}
+Description:
+  ${pullrequest.description}
 `)
 }
 
