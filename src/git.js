@@ -38,3 +38,7 @@ export function checkoutBranch(branchName) {
 export function createBranch(branchName) {
   return execSync(`git checkout -b ${branchName}`, { encoding: 'utf8' })
 }
+
+export function createCommit(message) {
+  return execSync(`git commit -m "${message}"`, { encoding: 'utf8' })
+}
