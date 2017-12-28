@@ -55,6 +55,7 @@ async function promptCheckout() {
       when: () => true,
     })
 
+    console.log(chalk.green('Yes! I\'m excited about this'))
     createBranch(`${branchType}/${issue}`)
 
     return { success: true }
