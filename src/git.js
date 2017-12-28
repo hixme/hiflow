@@ -34,3 +34,7 @@ export function refreshRepo() {
 export function checkoutBranch(branchName) {
   return execSync(`git checkout ${branchName}`, { encoding: 'utf8' })
 }
+
+export function createBranch(branchName) {
+  return execSync(`git checkout -b ${branchName}`, { encoding: 'utf8' })
+}
