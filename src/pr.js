@@ -8,6 +8,7 @@ import {
   getPullRequests,
   getRepository,
   createPullRequest,
+  addPullRequestComment,
 } from './bitbucket'
 
 import {
@@ -37,6 +38,22 @@ function getPullRequestActions(pr) {
     merge: () => bitbucketRequest(pr.links.merge.href, {}, 'post'),
     exit: () => {},
   }
+
+  return actions
+}
+
+// not support with bitbucket API 2.0
+function promptComment(prId) {
+  return inquirer.prompt({
+    type: 'input',
+    name: 'comment',
+    message: `Your comment:`,
+    validate: val => !!val,
+    filter: val => val.trim(),
+    when: () => true,
+  })
+  .then(({ comment }) => addPullRequestComment(comment))
+  .catch(e => console.log(e))
 }
 
 function promptCreatePullRequest() {
