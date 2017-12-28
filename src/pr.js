@@ -49,7 +49,7 @@ async function getPullRequestActions(pr) {
     [approvalType]: () => bitbucketRequest(pr.links.approve.href, {}, approvalMethod),
     decline: () => bitbucketRequest(pr.links.decline.href, {}, 'post'),
     // comment: () => promptComment(pr.id),
-    activity: () => bitbucketRequest(pr.links.activity.href),
+    // activity: () => bitbucketRequest(pr.links.activity.href),
     merge: () => bitbucketRequest(pr.links.merge.href, {}, 'post'),
     exit: () => {},
   }
