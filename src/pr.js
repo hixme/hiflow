@@ -142,10 +142,8 @@ function promptCreatePullRequest() {
             reviewers.split(',').map(i => ({ username: i.trim() })) : [],
         }))
         .then(res => {
-          console.log(`
-${chalk.green('Pull request created!')}
-${chalk.cyan('==>')} ${res.links.html.href}
-`)
+          console.log(`${chalk.green('Pull request created!')}`)
+          outputPRLink(res.links.html.href)
         })
         .catch(error => {
           console.log(error)
@@ -163,51 +161,47 @@ async function promptPullRequestList() {
       return console.log('No pull requests found')
     }
 
-    return inquirer.prompt({
-        type: 'list',
-        name: 'pullrequest',
-        message: 'Select a pull request?',
-        choices: list.map(({ author, state, id, title, ...pr }) => ({
-          name: `(${state}) #${id} by ${author.display_name} - ${title}`,
-          value: {
-            actions: getPullRequestActions({ author, state, id, title, ...pr }),
-            author,
-            id,
-            title,
-            ...pr
-          },
-        })),
-        validate: val => !!val,
-        when: () => true,
-      })
-      .then(({ pullrequest }) => {
-        // console.log(pullrequest)
-        outputPRSummary(pullrequest)
-
-        return inquirer.prompt({
-          type: 'list',
-          name: 'action',
-          message: 'What action would you like to perform?',
-          choices: () => Object.keys(pullrequest.actions).map(action => ({
-            name: action,
-            value: pullrequest.actions[action]
-          })),
-          validate: val => !!val,
-          when: () => true,
-        })
+    const { pullrequest } = await inquirer.prompt({
+      type: 'list',
+      name: 'pullrequest',
+      message: 'Select a pull request?',
+      choices: list.map(({ author, state, id, title, ...pr }) => ({
+        name: `(${state}) #${id} by ${author.display_name} - ${title}`,
+        value: {
+          author,
+          id,
+          title,
+          ...pr
+        },
+      })),
+      validate: val => !!val,
+      when: () => true,
     })
-    .then((res) => {
-      if (res && res.action) {
-        return res.action() || true
-      }
 
-      return null
+    outputPRSummary(pullrequest)
+
+    const actions = await getPullRequestActions(pullrequest)
+    const { action } = await inquirer.prompt({
+      type: 'list',
+      name: 'action',
+      message: 'What action would you like to perform?',
+      choices: Object.keys(actions).map(action => ({
+        name: action,
+        value: actions[action]
+      })),
+      validate: val => !!val,
+      when: () => true,
     })
-    .then((data) => {
+
+    if (action) {
+      const data = await action()
+      outputPRLink(pullrequest.links.html.href)
       if (data && data.values) {
-        res.data.values.map(console.log)
+        // data.values.map((i) => console.log('i - ', JSON.stringify(i)))
       }
-    })
+    }
+
+    return { success: true }
   } catch (e) {
     throw e
   }
