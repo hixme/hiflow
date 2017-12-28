@@ -6,10 +6,14 @@ import { _, command, create, args } from './args';
 import { runSetup } from './config'
 import promptPullRequestCommand from './pr'
 import promptCheckoutCommand from './checkout'
+import promptCommitCommand from './commit'
 
 switch (command) {
   case 'config':
     runSetup()
+    break
+  case 'commit':
+    promptCommitCommand()
     break
   case 'checkout':
     promptCheckoutCommand()
