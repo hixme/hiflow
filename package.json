@@ -1,6 +1,6 @@
 {
   "name": "hiflow",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "A pull request and gitflow management tool",
   "main": "lib/index.js",
   "directories": {
