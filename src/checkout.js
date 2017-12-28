@@ -11,29 +11,51 @@ import {
 } from './git'
 
 async function promptCheckout() {
+  let defaultType = null
+  const currentBranch = getRepositoryBranch()
+  console.log(chalk.cyan(`You are on the ${currentBranch} branch.`))
 
   try {
-    const { type, issue } = await inquirer.prompt([{
-      type: 'list',
-      name: 'type',
-      message: 'What type of branch?',
-      choices: [
-        'feature',
-        'improvement',
-        'fix',
-        'hotfix',
-      ],
-      validate: val => !!val,
-      when: () => true,
-    }, {
+    let branchType = null
+
+    if (currentBranch === 'master') {
+      const { doHotfix } = await inquirer.prompt({
+        type: 'confirm',
+        name: 'doHotfix',
+        message: 'Do you want to do a hotfix?',
+      })
+      console.log(doHotfix)
+      if (doHotfix) branchType = 'hotfix'
+    }
+
+    if (!branchType) {
+      const { type } = await inquirer.prompt({
+        type: 'list',
+        name: 'type',
+        message: 'What type of branch?',
+        choices: [
+          'feature',
+          'improvement',
+          'fix',
+          'hotfix',
+        ],
+        default: 'feature',
+        validate: val => !!val,
+        when: () => true,
+      })
+
+      branchType = type
+    }
+
+    const { issue } = await inquirer.prompt({
       type: 'input',
       name: 'issue',
       message: 'Issue name:',
       validate: val => !!val,
       when: () => true,
-    }])
+    })
 
-    createBranch(`${type}/${issue}`)
+    createBranch(`${branchType}/${issue}`)
 
     return { success: true }
   } catch (e) {
