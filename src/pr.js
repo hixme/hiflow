@@ -3,6 +3,7 @@ import inquirer from 'inquirer'
 import chalk from 'chalk'
 
 import { HOME } from './args'
+import { getConfig } from './config'
 import {
   bitbucketRequest,
   getPullRequests,
@@ -29,12 +30,21 @@ function outputPRSummary(pullrequest) {
 `)
 }
 
-function getPullRequestActions(pr) {
+async function getPullRequestActions(pr) {
+  const activity = (await bitbucketRequest(pr.links.activity.href)).values
+
+  // based on activity, setup approve or unapprove link
+  const hasApproved = activity.find(({ approval }) =>
+    (approval ? approval.user.username === CURRENT_USERNAME : false))
+  const approvalType = hasApproved ? 'unapprove' : 'approve'
+  const approvalMethod = hasApproved ? 'delete' : 'post'
+
   return {
     checkout: () => refreshRepo && checkoutBranch(pr.source.branch.name),
-    approve: () => bitbucketRequest(pr.links.approve.href, {}, 'post'),
+    [approvalType]: () => bitbucketRequest(pr.links.approve.href, {}, approvalMethod),
     decline: () => bitbucketRequest(pr.links.decline.href, {}, 'post'),
-    // activity: async () => await bitbucketRequest(pr.links.activity.href),
+    // comment: () => promptComment(pr.id),
+    activity: () => bitbucketRequest(pr.links.activity.href),
     merge: () => bitbucketRequest(pr.links.merge.href, {}, 'post'),
     exit: () => {},
   }
