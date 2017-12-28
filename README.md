@@ -57,3 +57,15 @@ hi checkout
 ![alt text](https://raw.githubusercontent.com/hixme/hiflow/master/images/checkout-step-2.png "hi checkout display")
 
 ![alt text](https://raw.githubusercontent.com/hixme/hiflow/master/images/checkout-step-3.png "hi checkout display")
+
+
+## hi commit
+
+Hiflow commit helps to prefix and format your commit messages.
+
+```bash
+hi commit
+
+```
+
+![alt text](https://raw.githubusercontent.com/hixme/hiflow/master/images/commit-step-1.png "hi commit display")
