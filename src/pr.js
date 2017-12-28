@@ -208,7 +208,7 @@ async function promptPullRequestList() {
 }
 
 
-export function promptPullRequestCommand(create) {
+export default function promptPullRequestCommand(create) {
   if (create) {
     return promptCreatePullRequest()
   }
