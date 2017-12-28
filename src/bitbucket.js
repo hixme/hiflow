@@ -57,3 +57,9 @@ export function createPullRequest(data) {
 export function getRepository() {
   return bitbucketRequest(BITBUCKET_API_BASEURL)
 }
+
+// 1.0 API no longer available. No support for 2.0
+const BITBUCKET_API_BASEURL_VERSION1 = `https://bitbucket.org/!api/1.0/repositories/${GIT_REPO_ORIGIN_USERNAME}/${GIT_REPO_NAME}`
+export function addPullRequestComment(prId, comment) {
+  return bitbucketRequest(`${BITBUCKET_API_BASEURL_VERSION1}/pullrequests/${prId}/comments`, comment, 'post')
+}
