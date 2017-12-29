@@ -9,6 +9,7 @@ import {
   getPullRequests,
   getRepository,
   getRepositoryDefaultReviewers,
+  getRepositoryStatuses,
   createPullRequest,
   addPullRequestComment,
 } from './bitbucket'
@@ -26,15 +27,51 @@ function outputPRLink(link) {
   console.log(`${chalk.cyan('==>')} ${link}`)
 }
 
-function outputPRSummary(pullrequest) {
-  const { id, title, description, author } = pullrequest || {}
+function logPRStatus({ state, type, url }) {
+  if (type === 'build') {
+    let buildColor = chalk.white
+    if (state === 'INPROGRESS') {
+      buildColor = chalk.yellow
+    } else if (state === 'SUCCESSFUL') {
+      buildColor = chalk.green
+    } else if (state === 'FAILED') {
+      buildColor = chalk.red
+    }
+    console.log(`Build: ${buildColor(state)}`)
+    console.log(`URL: ${url}\n`)
+  }
+}
+
+function logPRHeader({ id, author, title, description }) {
   console.log(`
-${chalk.cyan(`#${pullrequest.id} ${pullrequest.title}`)}
+${chalk.cyan(`#${id} ${title}`)}
 Author: ${author.display_name}
-Description:
-  ${pullrequest.description}
 `)
 }
+
+function logPRDescription({ description }) {
+  console.log(`${chalk.yellow('Description:')} ${description} `)
+}
+
+async function renderPRSummary(pullrequest) {
+  try {
+    const { id, title, description, author, links } = pullrequest || {}
+    const statuses = (await bitbucketRequest(links.statuses.href)).values
+
+    logPRHeader(pullrequest)
+
+    if (statuses && statuses.length) {
+      statuses.forEach(logPRStatus)
+    }
+
+    logPRDescription(pullrequest)
+
+    return true
+  } catch (e) {
+    throw e
+  }
+}
+
 
 async function getPullRequestActions(pr) {
   const activity = (await bitbucketRequest(pr.links.activity.href)).values
@@ -52,7 +89,7 @@ async function getPullRequestActions(pr) {
     // comment: () => promptComment(pr.id),
     // activity: () => bitbucketRequest(pr.links.activity.href),
     merge: () => bitbucketRequest(pr.links.merge.href, {}, 'post'),
-    exit: () => {},
+    quit: () => {},
   }
 
   return actions
@@ -192,33 +229,18 @@ async function promptCreatePullRequest() {
   }
 }
 
-async function promptPullRequestList() {
+function promptRepeatActionsList() {
+  return inquirer.prompt({
+    type: 'confirm',
+    name: 'repeat',
+    message: 'See actions again?',
+    validate: val => !!val,
+    when: () => true,
+  })
+}
+
+async function promptPullRequestActions(pullrequest) {
   try {
-    const list = await getPullRequests()
-
-    if (list.length === 0) {
-      return console.log('No pull requests found')
-    }
-
-    const { pullrequest } = await inquirer.prompt({
-      type: 'list',
-      name: 'pullrequest',
-      message: 'Select a pull request?',
-      choices: list.map(({ author, state, id, title, ...pr }) => ({
-        name: `(${state}) #${id} by ${author.display_name} - ${title}`,
-        value: {
-          author,
-          id,
-          title,
-          ...pr
-        },
-      })),
-      validate: val => !!val,
-      when: () => true,
-    })
-
-    outputPRSummary(pullrequest)
-
     const actions = await getPullRequestActions(pullrequest)
     const { action } = await inquirer.prompt({
       type: 'list',
@@ -239,6 +261,42 @@ async function promptPullRequestList() {
         // data.values.map((i) => console.log('i - ', JSON.stringify(i)))
       }
     }
+
+    return null
+  } catch (e) {
+    throw e
+  }
+}
+
+async function promptPullRequestList() {
+  try {
+    const list = await getPullRequests()
+
+    if (list.length === 0) {
+      return console.log('No pull requests found')
+    }
+
+    const { pullrequest } = await inquirer.prompt({
+      type: 'list',
+      name: 'pullrequest',
+      message: 'Select a pull request?',
+      choices: list.map(({ author, state, id, title, ...pr }) => ({
+        name: `(${state}) #${id} by ${author.display_name} - ${title}`,
+        value: {
+          author,
+          state,
+          id,
+          title,
+          ...pr
+        },
+      })),
+      validate: val => !!val,
+      when: () => true,
+    })
+
+    await renderPRSummary(pullrequest)
+
+    return await promptPullRequestActions(pullrequest)
 
     return { success: true }
   } catch (e) {

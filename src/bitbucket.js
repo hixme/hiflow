@@ -58,6 +58,11 @@ export function getRepository() {
   return bitbucketRequest(BITBUCKET_API_BASEURL)
 }
 
+export function getRepositoryStatuses(pullrequestId) {
+  return bitbucketRequest(buildAPIUrl(`pullrequests/${pullrequestId}/statuses`))
+    .then(data => data.values)
+}
+
 // TODO: recurse to get all pages of pull requests
 export function getRepositoryDefaultReviewers() {
   return bitbucketRequest(buildAPIUrl(`default-reviewers`))
