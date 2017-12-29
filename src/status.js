@@ -19,18 +19,35 @@ import {
 async function runStatus() {
   try {
     const pullrequests = await getPullRequests()
-    await Promise.all(pullrequests.map(async pullrequest => {
+    if (pullrequests.length === 0) {
+      console.log(chalk.yellow('No pull requests available'))
+      return true
+    }
 
+    console.log(`\n${pullrequests.length} Pull request(s)`)
+
+    const prGroups = await Promise.all(pullrequests.map(async (pullrequest) => {
+      const prstatus = (await bitbucketRequest(pullrequest.links.statuses.href)).values
+
+      return {
+        id: pullrequest.id,
+        pullrequest,
+        statuses: prstatus
+      }
+    }))
+
+    prGroups.sort(pr => pr.id).forEach(({ pullrequest, statuses }, index) => {
       const { id, title, description, author, links } = pullrequest || {}
-      const statuses = (await bitbucketRequest(links.statuses.href)).values
+      index === 0 ? console.log(chalk.dim('====================================')) :
+        console.log('-------------------------------------')
 
       logPRHeader(pullrequest)
 
       if (statuses && statuses.length) {
         statuses.forEach(logPRStatus)
       }
-      console.log('-------------------------------------')
-    }))
+    })
+
     return true
 
   } catch(e) {
