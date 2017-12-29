@@ -229,6 +229,45 @@ async function promptCreatePullRequest() {
   }
 }
 
+function promptRepeatActionsList() {
+  return inquirer.prompt({
+    type: 'confirm',
+    name: 'repeat',
+    message: 'See actions again?',
+    validate: val => !!val,
+    when: () => true,
+  })
+}
+
+async function promptPullRequestActions(pullrequest) {
+  try {
+    const actions = await getPullRequestActions(pullrequest)
+    const { action } = await inquirer.prompt({
+      type: 'list',
+      name: 'action',
+      message: 'What action would you like to perform?',
+      choices: Object.keys(actions).map(action => ({
+        name: action,
+        value: actions[action]
+      })),
+      validate: val => !!val,
+      when: () => true,
+    })
+
+    if (action) {
+      const data = await action()
+      outputPRLink(pullrequest.links.html.href)
+      if (data && data.values) {
+        // data.values.map((i) => console.log('i - ', JSON.stringify(i)))
+      }
+    }
+
+    return null
+  } catch (e) {
+    throw e
+  }
+}
+
 async function promptPullRequestList() {
   try {
     const list = await getPullRequests()
