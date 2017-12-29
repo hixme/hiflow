@@ -27,15 +27,51 @@ function outputPRLink(link) {
   console.log(`${chalk.cyan('==>')} ${link}`)
 }
 
-function outputPRSummary(pullrequest) {
-  const { id, title, description, author } = pullrequest || {}
+function logPRStatus({ state, type, url }) {
+  if (type === 'build') {
+    let buildColor = chalk.white
+    if (state === 'INPROGRESS') {
+      buildColor = chalk.yellow
+    } else if (state === 'SUCCESSFUL') {
+      buildColor = chalk.green
+    } else if (state === 'FAILED') {
+      buildColor = chalk.red
+    }
+    console.log(`Build: ${buildColor(state)}`)
+    console.log(`URL: ${url}\n`)
+  }
+}
+
+function logPRHeader({ id, author, title, description }) {
   console.log(`
-${chalk.cyan(`#${pullrequest.id} ${pullrequest.title}`)}
+${chalk.cyan(`#${id} ${title}`)}
 Author: ${author.display_name}
-Description:
-  ${pullrequest.description}
 `)
 }
+
+function logPRDescription({ description }) {
+  console.log(`${chalk.yellow('Description:')} ${description} `)
+}
+
+async function renderPRSummary(pullrequest) {
+  try {
+    const { id, title, description, author, links } = pullrequest || {}
+    const statuses = (await bitbucketRequest(links.statuses.href)).values
+
+    logPRHeader(pullrequest)
+
+    if (statuses && statuses.length) {
+      statuses.forEach(logPRStatus)
+    }
+
+    logPRDescription(pullrequest)
+
+    return true
+  } catch (e) {
+    throw e
+  }
+}
+
 
 async function getPullRequestActions(pr) {
   const activity = (await bitbucketRequest(pr.links.activity.href)).values
@@ -209,6 +245,7 @@ async function promptPullRequestList() {
         name: `(${state}) #${id} by ${author.display_name} - ${title}`,
         value: {
           author,
+          state,
           id,
           title,
           ...pr
@@ -218,28 +255,9 @@ async function promptPullRequestList() {
       when: () => true,
     })
 
-    outputPRSummary(pullrequest)
+    await renderPRSummary(pullrequest)
 
-    const actions = await getPullRequestActions(pullrequest)
-    const { action } = await inquirer.prompt({
-      type: 'list',
-      name: 'action',
-      message: 'What action would you like to perform?',
-      choices: Object.keys(actions).map(action => ({
-        name: action,
-        value: actions[action]
-      })),
-      validate: val => !!val,
-      when: () => true,
-    })
-
-    if (action) {
-      const data = await action()
-      outputPRLink(pullrequest.links.html.href)
-      if (data && data.values) {
-        // data.values.map((i) => console.log('i - ', JSON.stringify(i)))
-      }
-    }
+    return await promptPullRequestActions(pullrequest)
 
     return { success: true }
   } catch (e) {
