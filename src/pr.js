@@ -95,7 +95,7 @@ async function promptCreatePullRequest() {
       return true
     }
 
-    const [repository, defaultReviewers] = await Promise.all([
+    const [ repository, defaultReviewers ] = await Promise.all([
       getRepository(),
       getRepositoryDefaultReviewers(),
     ])
@@ -105,7 +105,8 @@ async function promptCreatePullRequest() {
         destination,
         title,
         description,
-        reviewers,
+        reviewers = [],
+        addReviewers,
       } = await inquirer.prompt([
         {
           type: 'input',
@@ -132,20 +133,37 @@ async function promptCreatePullRequest() {
           filter: val => val.trim(),
         },
         {
-          type: 'input',
+          type: 'checkbox',
           name: 'reviewers',
+          message: 'Select your reviewers:',
+          choices: defaultReviewers.map(i => ({
+            name: i.display_name,
+            value: i.username,
+            checked: true,
+          })),
+          when: () => defaultReviewers.length
+        },
+        {
+          type: 'input',
+          name: 'addReviewers',
           message: 'Add reviewers? (Enter usernames as csv)',
           filter: val => val.trim(),
         }
       ])
+
+      const allReviewers = [
+          ...reviewers,
+          ...addReviewers.split(',')
+        ]
+        .filter(i => i && i.trim().length)
+        .map(i => ({ username: i.trim() }))
 
       const pullRequest = await createPullRequest({
         ...prObj,
         destination: { branch: { name: destination } },
         title,
         description,
-        reviewers: reviewers ?
-          reviewers.split(',').map(i => ({ username: i.trim() })) : [],
+        reviewers: allReviewers,
       })
 
       console.log(`${chalk.green('Pull request created!')}`)
