@@ -51,7 +51,7 @@ async function promptCheckout() {
     const { issue } = await inquirer.prompt({
       type: 'input',
       name: 'issue',
-      message: 'Issue name:',
+      message: branchType === 'release' ? 'Version:' : 'Issue name:',
       validate: val => !!val,
       when: () => true,
     })
