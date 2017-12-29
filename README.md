@@ -42,7 +42,7 @@ experience*
 ## hi checkout
 
 Hiflow checkout wants help you with your branch naming. Current branch options
-are feature, improvement, fix, and hotfix.
+are feature, improvement, fix, hotfix, and release.
 
 ![alt text](https://raw.githubusercontent.com/hixme/hiflow/master/images/checkout-step-1.png "hi checkout display")
 
