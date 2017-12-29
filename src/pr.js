@@ -127,17 +127,24 @@ async function promptCreatePullRequest() {
         {
           type: 'input',
           name: 'title',
-          message: 'Add pull request title?',
+          message: 'Pull request title:',
           default: currentBranch,
           validate: val => !!val,
           filter: val => val.trim(),
           when: () => true,
         },
         {
+          type: 'confirm',
+          name: 'addDescription',
+          message: 'Add pull request description?',
+          when: () => true,
+        },
+        {
           type: 'editor',
           name: 'description',
-          message: 'Add pull request description?',
+          message: 'Description:',
           filter: val => val.trim(),
+          when: ({ addDescription }) => addDescription,
         },
         {
           type: 'checkbox',
