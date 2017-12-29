@@ -74,7 +74,6 @@ function promptComment(prId) {
 
 async function promptCreatePullRequest() {
   const currentBranch = getRepositoryBranch()
-
   const prObj = {
     source: { branch: { name: currentBranch, }, },
     title: '',

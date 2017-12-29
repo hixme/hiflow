@@ -58,8 +58,10 @@ export function getRepository() {
   return bitbucketRequest(BITBUCKET_API_BASEURL)
 }
 
+// TODO: recurse to get all pages of pull requests
 export function getRepositoryDefaultReviewers() {
   return bitbucketRequest(buildAPIUrl(`default-reviewers`))
+    .then(data => data.values)
 }
 
 // 1.0 API no longer available. No support for 2.0
