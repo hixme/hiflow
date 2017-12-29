@@ -38,6 +38,7 @@ async function promptCheckout() {
           'improvement',
           'fix',
           'hotfix',
+          'release',
         ],
         default: 'feature',
         validate: val => !!val,
@@ -55,7 +56,7 @@ async function promptCheckout() {
       when: () => true,
     })
 
-    console.log(chalk.green('Yes! I\'m excited about this'))
+    console.log(chalk.green('Yes! I\'m excited about this.'))
     createBranch(`${branchType}/${issue}`)
 
     return { success: true }
