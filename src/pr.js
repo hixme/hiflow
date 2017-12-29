@@ -103,6 +103,7 @@ async function promptCreatePullRequest() {
     if (repository) {
       const {
         destination,
+        closeBranch,
         title,
         description,
         reviewers = [],
@@ -115,6 +116,12 @@ async function promptCreatePullRequest() {
           default: repository.mainbranch.name,
           validate: val => !!val,
           filter: val => val.trim(),
+          when: () => true,
+        },
+        {
+          type: 'confirm',
+          name: 'closeBranch',
+          message: 'Close branch on merge?',
           when: () => true,
         },
         {
@@ -163,6 +170,7 @@ async function promptCreatePullRequest() {
         destination: { branch: { name: destination } },
         title,
         description,
+        close_source_branch: closeBranch,
         reviewers: allReviewers,
       })
 
