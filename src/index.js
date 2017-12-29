@@ -7,6 +7,7 @@ import { runSetup } from './config'
 import promptPullRequestCommand from './pr'
 import promptCheckoutCommand from './checkout'
 import promptCommitCommand from './commit'
+import promptStatusCommmand from './status'
 
 switch (command) {
   case 'config':
@@ -26,5 +27,8 @@ switch (command) {
           console.log(chalk.magenta('Sorry, there was an error'))
         }
       })
+    break
+  case 'status':
+    promptStatusCommmand()
     break
 }
