@@ -9,7 +9,8 @@ npm install -g hiflow
 
 ## hi config
 
-Run this to setup access to the bitbucket API so you can access your projects
+Run this to setup access to the bitbucket API so you can access your
+repositories for pull request maintenance.
 
 ```bash
 hi config
