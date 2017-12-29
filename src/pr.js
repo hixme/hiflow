@@ -8,6 +8,7 @@ import {
   bitbucketRequest,
   getPullRequests,
   getRepository,
+  getRepositoryDefaultReviewers,
   createPullRequest,
   addPullRequestComment,
 } from './bitbucket'
@@ -71,9 +72,8 @@ function promptComment(prId) {
   .catch(e => console.log(e))
 }
 
-function promptCreatePullRequest() {
+async function promptCreatePullRequest() {
   const currentBranch = getRepositoryBranch()
-
   const prObj = {
     source: { branch: { name: currentBranch, }, },
     title: '',
@@ -81,7 +81,8 @@ function promptCreatePullRequest() {
     reviewers: [],
   }
 
-  return inquirer.prompt({
+  try {
+    const { createpr } = await inquirer.prompt({
       type: 'confirm',
       name: 'createpr',
       message: `Would you like to create a pull request for your branch ${currentBranch}?`,
@@ -89,68 +90,106 @@ function promptCreatePullRequest() {
       filter: val => val.trim(),
       when: () => true,
     })
-    .then(({ createpr }) => {
-      if (createpr) {
-        return getRepository()
-      }
-    })
-    .then((data) => {
-      if (data) {
-        return inquirer.prompt([
-          {
-            type: 'input',
-            name: 'destination',
-            message: 'What branch should this pull request merge into?',
-            default: data.mainbranch.name,
-            validate: val => !!val,
-            filter: val => val.trim(),
-            when: () => true,
-          },
-          {
-            type: 'input',
-            name: 'title',
-            message: 'Add pull request title?',
-            default: currentBranch,
-            validate: val => !!val,
-            filter: val => val.trim(),
-            when: () => true,
-          },
-          {
-            type: 'input',
-            name: 'description',
-            message: 'Add pull request description?',
-            filter: val => val.trim(),
-          },
-          {
-            type: 'input',
-            name: 'reviewers',
-            message: 'Add reviewers? (Enter usernames as csv)',
-            filter: val => val.trim(),
-          }
-        ])
-        .then(({
-          destination,
-          title,
-          description,
-          reviewers,
-        }) => createPullRequest({
-          ...prObj,
-          destination: { branch: { name: destination } },
-          title,
-          description,
-          reviewers: reviewers ?
-            reviewers.split(',').map(i => ({ username: i.trim() })) : [],
-        }))
-        .then(res => {
-          console.log(`${chalk.green('Pull request created!')}`)
-          outputPRLink(res.links.html.href)
-        })
-        .catch(error => {
-          console.log(error)
-          throw error
-        })
-      }
-    })
+
+    if (!createpr) {
+      return true
+    }
+
+    const [ repository, defaultReviewers ] = await Promise.all([
+      getRepository(),
+      getRepositoryDefaultReviewers(),
+    ])
+
+    if (repository) {
+      const {
+        destination,
+        closeBranch,
+        title,
+        description,
+        reviewers = [],
+        addReviewers,
+      } = await inquirer.prompt([
+        {
+          type: 'input',
+          name: 'destination',
+          message: 'What branch should this pull request merge into?',
+          default: repository.mainbranch.name,
+          validate: val => !!val,
+          filter: val => val.trim(),
+          when: () => true,
+        },
+        {
+          type: 'confirm',
+          name: 'closeBranch',
+          message: 'Close branch on merge?',
+          when: () => true,
+        },
+        {
+          type: 'input',
+          name: 'title',
+          message: 'Pull request title:',
+          default: currentBranch,
+          validate: val => !!val,
+          filter: val => val.trim(),
+          when: () => true,
+        },
+        {
+          type: 'confirm',
+          name: 'addDescription',
+          message: 'Add pull request description?',
+          when: () => true,
+        },
+        {
+          type: 'editor',
+          name: 'description',
+          message: 'Description:',
+          filter: val => val.trim(),
+          when: ({ addDescription }) => addDescription,
+        },
+        {
+          type: 'checkbox',
+          name: 'reviewers',
+          message: 'Select your reviewers:',
+          choices: defaultReviewers.map(i => ({
+            name: i.display_name,
+            value: i.username,
+            checked: true,
+          })),
+          when: () => defaultReviewers.length
+        },
+        {
+          type: 'input',
+          name: 'addReviewers',
+          message: 'Add reviewers? (Enter usernames as csv)',
+          filter: val => val.trim(),
+        }
+      ])
+
+      const allReviewers = [
+          ...reviewers,
+          ...addReviewers.split(',')
+        ]
+        .filter(i => i && i.trim().length)
+        .map(i => ({ username: i.trim() }))
+
+      const pullRequest = await createPullRequest({
+        ...prObj,
+        destination: { branch: { name: destination } },
+        title,
+        description,
+        close_source_branch: closeBranch,
+        reviewers: allReviewers,
+      })
+
+      console.log(`${chalk.green('Pull request created!')}`)
+      outputPRLink(pullRequest.links.html.href)
+    }
+
+    return { success: true }
+  } catch (e) {
+    console.log(error)
+    throw e
+  }
 }
 
 async function promptPullRequestList() {
