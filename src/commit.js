@@ -16,7 +16,7 @@ async function promptCommit() {
     const { message } = await inquirer.prompt({
       type: 'input',
       name: 'message',
-      message: `Message - ${currentBranch}:`,
+      message: `${currentBranch}:`,
       validate: val => !!val,
       when: () => true,
     })
