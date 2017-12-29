@@ -9,6 +9,7 @@ import {
   getPullRequests,
   getRepository,
   getRepositoryDefaultReviewers,
+  getRepositoryStatuses,
   createPullRequest,
   addPullRequestComment,
 } from './bitbucket'
@@ -52,7 +53,7 @@ async function getPullRequestActions(pr) {
     // comment: () => promptComment(pr.id),
     // activity: () => bitbucketRequest(pr.links.activity.href),
     merge: () => bitbucketRequest(pr.links.merge.href, {}, 'post'),
-    exit: () => {},
+    quit: () => {},
   }
 
   return actions
