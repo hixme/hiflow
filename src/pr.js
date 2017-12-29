@@ -126,7 +126,7 @@ async function promptCreatePullRequest() {
           when: () => true,
         },
         {
-          type: 'input',
+          type: 'editor',
           name: 'description',
           message: 'Add pull request description?',
           filter: val => val.trim(),
