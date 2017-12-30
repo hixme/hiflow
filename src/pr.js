@@ -60,8 +60,7 @@ async function getPullRequestActions(pr) {
   const activity = (await bitbucketRequest(pr.links.activity.href)).values
 
   // based on activity, setup approve or unapprove link
-  const hasApproved = activity.find(({ approval }) =>
-    (approval ? approval.user.username === CURRENT_USERNAME : false))
+  const hasApproved = parseUserApprovals(activity).includes(CURRENT_USERNAME)
   const approvalType = hasApproved ? 'unapprove' : 'approve'
   const approvalMethod = hasApproved ? 'delete' : 'post'
 
