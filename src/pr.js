@@ -26,12 +26,10 @@ import {
   logPRHeader,
   logPRStatus,
   logPRDescription,
+  logPRLink,
 } from './log'
 
 const CURRENT_USERNAME = getConfig().BITBUCKET_USERNAME
-function logPRLink(link) {
-  console.log(`${chalk.cyan('==>')} ${link}`)
-}
 
 async function renderPRSummary(pullrequest) {
   try {

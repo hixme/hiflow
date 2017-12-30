@@ -1,5 +1,9 @@
 import chalk from 'chalk'
 
+export function logPRLink(link) {
+  console.log(`${chalk.cyan('==>')} ${link}`)
+}
+
 export function logPRStatus({ state, type, url }) {
   if (type === 'build') {
     let buildColor = chalk.white
