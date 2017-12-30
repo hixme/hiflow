@@ -1,23 +1,18 @@
-import axios from 'axios'
 import inquirer from 'inquirer'
 import chalk from 'chalk'
 
-import { HOME } from './args'
 import { getConfig } from './config'
 import {
   bitbucketRequest,
   getPullRequests,
   getRepository,
   getRepositoryDefaultReviewers,
-  getRepositoryStatuses,
   createPullRequest,
   addPullRequestComment,
 } from './bitbucket'
 
 import {
   getRepositoryRemoteURL,
-  getRepositoryName,
-  getRepositoryRemoteUsername,
   getRepositoryBranch,
   refreshRepo,
   checkoutBranch,
@@ -33,10 +28,15 @@ import {
 
 const CURRENT_USERNAME = getConfig().BITBUCKET_USERNAME
 
+function parseUserApprovals(activity) {
+  return activity
+    .filter(({ approval }) => approval)
+    .map(({ approval }) => approval.user.username)
+}
+
 async function renderPRSummary(pullrequest) {
   try {
-    const { id, title, description, author, links } = pullrequest || {}
-    const [ statuses, activity ] = await Promise.all([
+    const [statuses, activity] = await Promise.all([
       bitbucketRequest(pullrequest.links.statuses.href).then(({ values }) => values),
       bitbucketRequest(pullrequest.links.activity.href).then(({ values }) => values),
     ])
@@ -58,12 +58,6 @@ async function renderPRSummary(pullrequest) {
   }
 }
 
-function parseUserApprovals(activity) {
-  return activity
-    .filter(({ approval }) => approval)
-    .map(({ approval }) => approval.user.username)
-}
-
 async function getPullRequestActions(pr) {
   const activity = (await bitbucketRequest(pr.links.activity.href)).values
 
@@ -81,8 +75,6 @@ async function getPullRequestActions(pr) {
     merge: () => bitbucketRequest(pr.links.merge.href, {}, 'post'),
     quit: () => {},
   }
-
-  return actions
 }
 
 // not support with bitbucket API 2.0
@@ -90,7 +82,7 @@ function promptComment(prId) {
   return inquirer.prompt({
     type: 'input',
     name: 'comment',
-    message: `Your comment:`,
+    message: 'Your comment:',
     validate: val => !!val,
     filter: val => val.trim(),
     when: () => true,
@@ -102,7 +94,7 @@ function promptComment(prId) {
 async function promptCreatePullRequest() {
   const currentBranch = getRepositoryBranch()
   const prObj = {
-    source: { branch: { name: currentBranch, }, },
+    source: { branch: { name: currentBranch } },
     title: '',
     description: '',
     reviewers: [],
@@ -122,7 +114,7 @@ async function promptCreatePullRequest() {
       return true
     }
 
-    const [ repository, defaultReviewers ] = await Promise.all([
+    const [repository, defaultReviewers] = await Promise.all([
       getRepository(),
       getRepositoryDefaultReviewers(),
     ])
@@ -182,20 +174,20 @@ async function promptCreatePullRequest() {
             value: i.username,
             checked: true,
           })),
-          when: () => defaultReviewers.length
+          when: () => defaultReviewers.length,
         },
         {
           type: 'input',
           name: 'addReviewers',
           message: 'Add reviewers? (Enter usernames as csv)',
           filter: val => val.trim(),
-        }
+        },
       ])
 
       const allReviewers = [
-          ...reviewers,
-          ...addReviewers.split(',')
-        ]
+        ...reviewers,
+        ...addReviewers.split(','),
+      ]
         .filter(i => i && i.trim().length)
         .map(i => ({ username: i.trim() }))
 
@@ -240,7 +232,7 @@ async function runStatus() {
     console.log(`\n${pullrequests.length} Pull request(s)`)
 
     const prGroups = await Promise.all(pullrequests.map(async (pullrequest) => {
-      const [ prstatus, activity ] = await Promise.all([
+      const [prstatus, activity] = await Promise.all([
         bitbucketRequest(pullrequest.links.statuses.href).then(({ values }) => values),
         bitbucketRequest(pullrequest.links.activity.href).then(({ values }) => values),
       ])
@@ -273,8 +265,7 @@ async function runStatus() {
     })
 
     return true
-
-  } catch(e) {
+  } catch (e) {
     throw e
   }
 }
@@ -286,9 +277,9 @@ async function promptPullRequestActions(pullrequest) {
       type: 'list',
       name: 'action',
       message: 'What action would you like to perform?',
-      choices: Object.keys(actions).map(action => ({
-        name: action,
-        value: actions[action]
+      choices: Object.keys(actions).map(a => ({
+        name: a,
+        value: actions[a],
       })),
       validate: val => !!val,
       when: () => true,
@@ -327,7 +318,7 @@ async function promptPullRequestList() {
           state,
           id,
           title,
-          ...pr
+          ...pr,
         },
       })),
       validate: val => !!val,
@@ -337,8 +328,6 @@ async function promptPullRequestList() {
     await renderPRSummary(pullrequest)
 
     return await promptPullRequestActions(pullrequest)
-
-    return { success: true }
   } catch (e) {
     throw e
   }

@@ -3,7 +3,7 @@ import { partialRight, omitBy, mapKeys, compact } from 'lodash'
 import { camelCase } from 'change-case'
 import QS from 'qs'
 
-const stringifyQS = partialRight(QS.stringify, { encode: false })
+const stringifyQS = partialRight(QS.stringify, { encode: false });
 
 const {
   argv,
