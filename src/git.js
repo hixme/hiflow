@@ -24,7 +24,10 @@ export function getRepositoryRemoteUsername() {
 
 export function getRepositoryName() {
   return getRepositoryRemoteURL()
-    .split('/').pop().trim().replace('.git', '')
+    .split('/')
+    .pop()
+    .trim()
+    .replace('.git', '')
 }
 
 export function refreshRepo() {

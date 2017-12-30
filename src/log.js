@@ -1,3 +1,4 @@
+/* eslint-disable no-console  */
 import chalk from 'chalk'
 
 export function logPRLink(link) {
@@ -18,7 +19,7 @@ export function logPRStatus({ state, type, url }) {
   }
 }
 
-export function logPRHeader({ id, author, title, description }) {
+export function logPRHeader({ id, author, title }) {
   console.log(`
 ${chalk.cyan(`#${id} ${title}`)}
 Author: ${author.display_name}
