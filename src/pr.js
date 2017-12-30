@@ -15,6 +15,7 @@ import {
 } from './bitbucket'
 
 import {
+  getRepositoryRemoteURL,
   getRepositoryName,
   getRepositoryRemoteUsername,
   getRepositoryBranch,
@@ -22,49 +23,34 @@ import {
   checkoutBranch,
 } from './git'
 
+import {
+  logPRHeader,
+  logPRStatus,
+  logPRDescription,
+  logPRApprovals,
+  logPRLink,
+} from './log'
+
 const CURRENT_USERNAME = getConfig().BITBUCKET_USERNAME
-function outputPRLink(link) {
-  console.log(`${chalk.cyan('==>')} ${link}`)
-}
-
-function logPRStatus({ state, type, url }) {
-  if (type === 'build') {
-    let buildColor = chalk.white
-    if (state === 'INPROGRESS') {
-      buildColor = chalk.yellow
-    } else if (state === 'SUCCESSFUL') {
-      buildColor = chalk.green
-    } else if (state === 'FAILED') {
-      buildColor = chalk.red
-    }
-    console.log(`Build: ${buildColor(state)}`)
-    console.log(`URL: ${url}\n`)
-  }
-}
-
-function logPRHeader({ id, author, title, description }) {
-  console.log(`
-${chalk.cyan(`#${id} ${title}`)}
-Author: ${author.display_name}
-`)
-}
-
-function logPRDescription({ description }) {
-  console.log(`${chalk.yellow('Description:')} ${description} `)
-}
 
 async function renderPRSummary(pullrequest) {
   try {
     const { id, title, description, author, links } = pullrequest || {}
-    const statuses = (await bitbucketRequest(links.statuses.href)).values
+    const [ statuses, activity ] = await Promise.all([
+      bitbucketRequest(pullrequest.links.statuses.href).then(({ values }) => values),
+      bitbucketRequest(pullrequest.links.activity.href).then(({ values }) => values),
+    ])
 
     logPRHeader(pullrequest)
+    logPRApprovals(parseUserApprovals(activity))
 
     if (statuses && statuses.length) {
       statuses.forEach(logPRStatus)
     }
 
-    logPRDescription(pullrequest)
+    if (pullrequest.description.trim().length) {
+      logPRDescription(pullrequest.description)
+    }
 
     return true
   } catch (e) {
@@ -72,13 +58,17 @@ async function renderPRSummary(pullrequest) {
   }
 }
 
+function parseUserApprovals(activity) {
+  return activity
+    .filter(({ approval }) => approval)
+    .map(({ approval }) => approval.user.username)
+}
 
 async function getPullRequestActions(pr) {
   const activity = (await bitbucketRequest(pr.links.activity.href)).values
 
   // based on activity, setup approve or unapprove link
-  const hasApproved = activity.find(({ approval }) =>
-    (approval ? approval.user.username === CURRENT_USERNAME : false))
+  const hasApproved = parseUserApprovals(activity).includes(CURRENT_USERNAME)
   const approvalType = hasApproved ? 'unapprove' : 'approve'
   const approvalMethod = hasApproved ? 'delete' : 'post'
 
@@ -219,7 +209,7 @@ async function promptCreatePullRequest() {
       })
 
       console.log(`${chalk.green('Pull request created!')}`)
-      outputPRLink(pullRequest.links.html.href)
+      logPRLink(pullRequest.links.html.href)
     }
 
     return { success: true }
@@ -239,6 +229,56 @@ function promptRepeatActionsList() {
   })
 }
 
+async function runStatus() {
+  try {
+    const pullrequests = await getPullRequests()
+    if (pullrequests.length === 0) {
+      console.log(chalk.yellow('No pull requests available'))
+      return true
+    }
+
+    console.log(`\n${pullrequests.length} Pull request(s)`)
+
+    const prGroups = await Promise.all(pullrequests.map(async (pullrequest) => {
+      const [ prstatus, activity ] = await Promise.all([
+        bitbucketRequest(pullrequest.links.statuses.href).then(({ values }) => values),
+        bitbucketRequest(pullrequest.links.activity.href).then(({ values }) => values),
+      ])
+
+      return {
+        id: pullrequest.id,
+        pullrequest,
+        statuses: prstatus,
+        approvals: parseUserApprovals(activity),
+      }
+    }))
+
+    prGroups.sort(pr => pr.id).forEach(({ pullrequest, statuses, approvals }, index) => {
+      const { id, title, description, author, links } = pullrequest || {}
+      index === 0 ? console.log(chalk.dim('====================================')) :
+        console.log('-------------------------------------')
+
+      logPRHeader(pullrequest)
+
+      if (approvals.length) {
+        console.log(`${chalk.green('\u2713')} Approved by ${approvals.join(', ')}\n`)
+      } else {
+        console.log(`${chalk.red('\u2717')} Not yet approved \n`)
+      }
+      if (statuses && statuses.length) {
+        statuses.forEach(logPRStatus)
+      }
+
+      logPRLink(pullrequest.links.html.href)
+    })
+
+    return true
+
+  } catch(e) {
+    throw e
+  }
+}
+
 async function promptPullRequestActions(pullrequest) {
   try {
     const actions = await getPullRequestActions(pullrequest)
@@ -256,7 +296,7 @@ async function promptPullRequestActions(pullrequest) {
 
     if (action) {
       const data = await action()
-      outputPRLink(pullrequest.links.html.href)
+      logPRLink(pullrequest.links.html.href)
       if (data && data.values) {
         // data.values.map((i) => console.log('i - ', JSON.stringify(i)))
       }
@@ -304,10 +344,18 @@ async function promptPullRequestList() {
   }
 }
 
+export default function promptPullRequestCommand({ create, status }) {
+  if (!getRepositoryRemoteURL().includes('bitbucket')) {
+    console.log(chalk.cyan('hi pr currently supported with bitbucket only'))
+    return Promise.resolve(true)
+  }
 
-export default function promptPullRequestCommand(create) {
   if (create) {
     return promptCreatePullRequest()
+  }
+
+  if (status) {
+    return runStatus()
   }
 
   return promptPullRequestList()

@@ -25,6 +25,12 @@ decline the pull request.
 
 ![alt text](https://raw.githubusercontent.com/hixme/hiflow/master/images/pr-step-2.png "hi pr display")
 
+## hi pr --status
+*requires bitbucket hosting*
+
+The status flag prints out an an overview of all pull requests available on
+the repository.
+
 
 ## hi pr --create
 *requires bitbucket hosting*
