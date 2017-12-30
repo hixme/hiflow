@@ -29,7 +29,7 @@ import {
 } from './log'
 
 const CURRENT_USERNAME = getConfig().BITBUCKET_USERNAME
-function outputPRLink(link) {
+function logPRLink(link) {
   console.log(`${chalk.cyan('==>')} ${link}`)
 }
 
@@ -50,6 +50,12 @@ async function renderPRSummary(pullrequest) {
   } catch (e) {
     throw e
   }
+}
+
+function parseUserApprovals(activity) {
+  return activity
+    .filter(({ approval }) => approval)
+    .map(({ approval }) => approval.user.username)
 }
 
 async function getPullRequestActions(pr) {
@@ -198,7 +204,7 @@ async function promptCreatePullRequest() {
       })
 
       console.log(`${chalk.green('Pull request created!')}`)
-      outputPRLink(pullRequest.links.html.href)
+      logPRLink(pullRequest.links.html.href)
     }
 
     return { success: true }
@@ -229,25 +235,36 @@ async function runStatus() {
     console.log(`\n${pullrequests.length} Pull request(s)`)
 
     const prGroups = await Promise.all(pullrequests.map(async (pullrequest) => {
-      const prstatus = (await bitbucketRequest(pullrequest.links.statuses.href)).values
+      const [ prstatus, activity ] = await Promise.all([
+        bitbucketRequest(pullrequest.links.statuses.href).then(({ values }) => values),
+        bitbucketRequest(pullrequest.links.activity.href).then(({ values }) => values),
+      ])
 
       return {
         id: pullrequest.id,
         pullrequest,
-        statuses: prstatus
+        statuses: prstatus,
+        approvals: parseUserApprovals(activity),
       }
     }))
 
-    prGroups.sort(pr => pr.id).forEach(({ pullrequest, statuses }, index) => {
+    prGroups.sort(pr => pr.id).forEach(({ pullrequest, statuses, approvals }, index) => {
       const { id, title, description, author, links } = pullrequest || {}
       index === 0 ? console.log(chalk.dim('====================================')) :
         console.log('-------------------------------------')
 
       logPRHeader(pullrequest)
 
+      if (approvals.length) {
+        console.log(`${chalk.green('\u2713')} Approved by ${approvals.join(', ')}\n`)
+      } else {
+        console.log(`${chalk.red('\u2717')} Not yet approved \n`)
+      }
       if (statuses && statuses.length) {
         statuses.forEach(logPRStatus)
       }
+
+      logPRLink(pullrequest.links.html.href)
     })
 
     return true
@@ -274,7 +291,7 @@ async function promptPullRequestActions(pullrequest) {
 
     if (action) {
       const data = await action()
-      outputPRLink(pullrequest.links.html.href)
+      logPRLink(pullrequest.links.html.href)
       if (data && data.values) {
         // data.values.map((i) => console.log('i - ', JSON.stringify(i)))
       }
