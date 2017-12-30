@@ -14,8 +14,7 @@ export function logPRStatus({ state, type, url }) {
     } else if (state === 'FAILED') {
       buildColor = chalk.red
     }
-    console.log(`Build: ${buildColor(state)}`)
-    console.log(`URL: ${url}\n`)
+    console.log(`Build: ${buildColor(state)} ${url}\n`)
   }
 }
 
@@ -26,6 +25,16 @@ Author: ${author.display_name}
 `)
 }
 
-export function logPRDescription({ description }) {
-  console.log(`${chalk.yellow('Description:')} ${description} `)
+export function logPRDescription(description) {
+  console.log(`${chalk.yellow('Description:')}
+${description}
+`)
+}
+
+export function logPRApprovals(approvals = []) {
+  if (approvals.length) {
+    console.log(`${chalk.green('\u2713')} Approved by ${approvals.join(', ')}\n`)
+  } else {
+    console.log(`${chalk.red('\u2717')} Not yet approved \n`)
+  }
 }

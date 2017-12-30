@@ -26,6 +26,7 @@ import {
   logPRHeader,
   logPRStatus,
   logPRDescription,
+  logPRApprovals,
   logPRLink,
 } from './log'
 
@@ -34,15 +35,21 @@ const CURRENT_USERNAME = getConfig().BITBUCKET_USERNAME
 async function renderPRSummary(pullrequest) {
   try {
     const { id, title, description, author, links } = pullrequest || {}
-    const statuses = (await bitbucketRequest(links.statuses.href)).values
+    const [ statuses, activity ] = await Promise.all([
+      bitbucketRequest(pullrequest.links.statuses.href).then(({ values }) => values),
+      bitbucketRequest(pullrequest.links.activity.href).then(({ values }) => values),
+    ])
 
     logPRHeader(pullrequest)
+    logPRApprovals(parseUserApprovals(activity))
 
     if (statuses && statuses.length) {
       statuses.forEach(logPRStatus)
     }
 
-    logPRDescription(pullrequest)
+    if (pullrequest.description.trim().length) {
+      logPRDescription(pullrequest.description)
+    }
 
     return true
   } catch (e) {
