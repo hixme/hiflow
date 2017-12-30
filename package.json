@@ -30,7 +30,6 @@
     "inquirer-chalk-pipe": "^1.2.0",
     "js-yaml": "^3.9.0",
     "lodash": "^4.17.4",
-    "node-fetch": "^1.7.1",
     "qs": "^6.5.0",
     "yargs": "^8.0.2"
   },
