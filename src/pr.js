@@ -22,35 +22,15 @@ import {
   checkoutBranch,
 } from './git'
 
+import {
+  logPRHeader,
+  logPRStatus,
+  logPRDescription,
+} from './log'
+
 const CURRENT_USERNAME = getConfig().BITBUCKET_USERNAME
 function outputPRLink(link) {
   console.log(`${chalk.cyan('==>')} ${link}`)
-}
-
-function logPRStatus({ state, type, url }) {
-  if (type === 'build') {
-    let buildColor = chalk.white
-    if (state === 'INPROGRESS') {
-      buildColor = chalk.yellow
-    } else if (state === 'SUCCESSFUL') {
-      buildColor = chalk.green
-    } else if (state === 'FAILED') {
-      buildColor = chalk.red
-    }
-    console.log(`Build: ${buildColor(state)}`)
-    console.log(`URL: ${url}\n`)
-  }
-}
-
-function logPRHeader({ id, author, title, description }) {
-  console.log(`
-${chalk.cyan(`#${id} ${title}`)}
-Author: ${author.display_name}
-`)
-}
-
-function logPRDescription({ description }) {
-  console.log(`${chalk.yellow('Description:')} ${description} `)
 }
 
 async function renderPRSummary(pullrequest) {
@@ -71,7 +51,6 @@ async function renderPRSummary(pullrequest) {
     throw e
   }
 }
-
 
 async function getPullRequestActions(pr) {
   const activity = (await bitbucketRequest(pr.links.activity.href)).values
@@ -239,6 +218,45 @@ function promptRepeatActionsList() {
   })
 }
 
+async function runStatus() {
+  try {
+    const pullrequests = await getPullRequests()
+    if (pullrequests.length === 0) {
+      console.log(chalk.yellow('No pull requests available'))
+      return true
+    }
+
+    console.log(`\n${pullrequests.length} Pull request(s)`)
+
+    const prGroups = await Promise.all(pullrequests.map(async (pullrequest) => {
+      const prstatus = (await bitbucketRequest(pullrequest.links.statuses.href)).values
+
+      return {
+        id: pullrequest.id,
+        pullrequest,
+        statuses: prstatus
+      }
+    }))
+
+    prGroups.sort(pr => pr.id).forEach(({ pullrequest, statuses }, index) => {
+      const { id, title, description, author, links } = pullrequest || {}
+      index === 0 ? console.log(chalk.dim('====================================')) :
+        console.log('-------------------------------------')
+
+      logPRHeader(pullrequest)
+
+      if (statuses && statuses.length) {
+        statuses.forEach(logPRStatus)
+      }
+    })
+
+    return true
+
+  } catch(e) {
+    throw e
+  }
+}
+
 async function promptPullRequestActions(pullrequest) {
   try {
     const actions = await getPullRequestActions(pullrequest)
@@ -304,10 +322,13 @@ async function promptPullRequestList() {
   }
 }
 
-
-export default function promptPullRequestCommand(create) {
+export default function promptPullRequestCommand({ create, status }) {
   if (create) {
     return promptCreatePullRequest()
+  }
+
+  if (status) {
+    return runStatus()
   }
 
   return promptPullRequestList()
