@@ -1,23 +1,26 @@
 #!/usr/bin/env node
 import chalk from 'chalk'
 
-import pkg from '../package'
 import { command, create, status } from './args'
 
+/* eslint-disable  global-require */
 switch (command) {
-  case 'config':
+  case 'config': {
     const { runSetup } = require('./config')
     runSetup()
     break
-  case 'commit':
+  }
+  case 'commit': {
     const { promptCommitCommand } = require('./commit')
     promptCommitCommand()
     break
-  case 'checkout':
+  }
+  case 'checkout': {
     const { promptCheckoutCommand } = require('./checkout')
     promptCheckoutCommand()
     break
-  case 'pr':
+  }
+  case 'pr': {
     const { promptPullRequestCommand } = require('./pr')
     promptPullRequestCommand({ status, create })
       .catch((e) => {
@@ -27,9 +30,12 @@ switch (command) {
         }
       })
     break
-  case 'version':
+  }
+  case 'version': {
+    const pkg = require('../package.json')
     console.log(pkg.version)
     break
+  }
   default:
     break
 }
