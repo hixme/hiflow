@@ -1,4 +1,4 @@
-const execSync = require('child_process').execSync
+import { execSync } from 'child_process'
 
 export function getRepositoryVersion() {
   return execSync('git describe --tags --abbrev=0', { encoding: 'utf8' }).trim()

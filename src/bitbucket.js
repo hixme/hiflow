@@ -32,8 +32,8 @@ export function bitbucketRequest(url, params = {}, method) {
       Authorization: `Basic ${BITBUCKET_TOKEN}`,
     },
   })
-  .then(handleResponse)
-  .catch(e => Promise.reject(handleError(e)))
+    .then(handleResponse)
+    .catch(e => Promise.reject(handleError(e)))
 }
 
 function buildAPIUrl(path) {

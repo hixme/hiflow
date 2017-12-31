@@ -77,7 +77,7 @@ export function promptUserSetup() {
 }
 
 function createToken(username, password) {
-  return new Buffer(`${username}:${password}`).toString('base64')
+  return Buffer.from(`${username}:${password}`, 'base64')
 }
 
 function handlePrompt({ username, password }) {

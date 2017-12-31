@@ -28,7 +28,7 @@ import {
 
 const CURRENT_USERNAME = getConfig().BITBUCKET_USERNAME
 
-function parseUserApprovals(activity) {
+export function parseUserApprovals(activity) {
   return activity
     .filter(({ approval }) => approval)
     .map(({ approval }) => approval.user.username)
@@ -78,7 +78,7 @@ async function getPullRequestActions(pr) {
 }
 
 // not support with bitbucket API 2.0
-function promptComment(prId) {
+export function promptComment() {
   return inquirer.prompt({
     type: 'input',
     name: 'comment',
@@ -87,8 +87,8 @@ function promptComment(prId) {
     filter: val => val.trim(),
     when: () => true,
   })
-  .then(({ comment }) => addPullRequestComment(comment))
-  .catch(e => console.log(e))
+    .then(({ comment }) => addPullRequestComment(comment))
+    .catch(e => console.log(e))
 }
 
 async function promptCreatePullRequest() {
@@ -206,12 +206,12 @@ async function promptCreatePullRequest() {
 
     return { success: true }
   } catch (e) {
-    console.log(error)
+    console.log(e)
     throw e
   }
 }
 
-function promptRepeatActionsList() {
+export function promptRepeatActionsList() {
   return inquirer.prompt({
     type: 'confirm',
     name: 'repeat',
@@ -246,9 +246,11 @@ async function runStatus() {
     }))
 
     prGroups.sort(pr => pr.id).forEach(({ pullrequest, statuses, approvals }, index) => {
-      const { id, title, description, author, links } = pullrequest || {}
-      index === 0 ? console.log(chalk.dim('====================================')) :
+      if (index === 0) {
+        console.log(chalk.dim('===================================='))
+      } else {
         console.log('-------------------------------------')
+      }
 
       logPRHeader(pullrequest)
 
@@ -311,7 +313,9 @@ async function promptPullRequestList() {
       type: 'list',
       name: 'pullrequest',
       message: 'Select a pull request?',
-      choices: list.map(({ author, state, id, title, ...pr }) => ({
+      choices: list.map(({
+        author, state, id, title, ...pr
+      }) => ({
         name: `(${state}) #${id} by ${author.display_name} - ${title}`,
         value: {
           author,
