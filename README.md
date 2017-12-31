@@ -67,3 +67,8 @@ formatting prefixes your commit with the branch name. If your branch name is
 
 
 ![alt text](https://raw.githubusercontent.com/hixme/hiflow/master/images/commit-step-1.png "hi commit display")
+
+
+## hi version
+
+
