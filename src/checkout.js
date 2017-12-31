@@ -59,7 +59,7 @@ async function promptCheckout() {
     throw e
   }
 }
-export default function promptCheckoutCommand() {
+export function promptCheckoutCommand() {
   return promptCheckout()
 }
 

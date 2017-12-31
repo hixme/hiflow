@@ -6,7 +6,7 @@ import {
   createCommit,
 } from './git'
 
-async function promptCommit() {
+export async function promptCommit() {
   const currentBranch = getRepositoryBranch()
 
   try {
@@ -31,7 +31,8 @@ async function promptCommit() {
     throw e
   }
 }
-export default function promptCommitCommand() {
+
+export function promptCommitCommand() {
   return promptCommit()
 }
 

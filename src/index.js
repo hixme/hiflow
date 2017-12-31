@@ -3,22 +3,22 @@ import chalk from 'chalk'
 
 import pkg from '../package'
 import { command, create, status } from './args'
-import { runSetup } from './config'
-import promptPullRequestCommand from './pr'
-import promptCheckoutCommand from './checkout'
-import promptCommitCommand from './commit'
 
 switch (command) {
   case 'config':
+    const { runSetup } = require('./config')
     runSetup()
     break
   case 'commit':
+    const { promptCommitCommand } = require('./commit')
     promptCommitCommand()
     break
   case 'checkout':
+    const { promptCheckoutCommand } = require('./checkout')
     promptCheckoutCommand()
     break
   case 'pr':
+    const { promptPullRequestCommand } = require('./pr')
     promptPullRequestCommand({ status, create })
       .catch((e) => {
         console.log('e = ', e)
