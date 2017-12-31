@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import chalk from 'chalk'
 
+import pkg from '../package'
 import { command, create, status } from './args'
 import { runSetup } from './config'
 import promptPullRequestCommand from './pr'
@@ -25,6 +26,9 @@ switch (command) {
           console.log(chalk.magenta('Sorry, there was an error'))
         }
       })
+    break
+  case 'version':
+    console.log(pkg.version)
     break
   default:
     break
