@@ -337,7 +337,7 @@ async function promptPullRequestList() {
   }
 }
 
-export default function promptPullRequestCommand({ create, status }) {
+export function promptPullRequestCommand({ create, status }) {
   if (!getRepositoryRemoteURL().includes('bitbucket')) {
     console.log(chalk.cyan('hi pr currently supported with bitbucket only'))
     return Promise.resolve(true)
