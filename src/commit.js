@@ -2,8 +2,6 @@ import inquirer from 'inquirer'
 import chalk from 'chalk'
 
 import {
-  getRepositoryName,
-  getRepositoryRemoteUsername,
   getRepositoryBranch,
   createCommit,
 } from './git'
@@ -12,7 +10,6 @@ async function promptCommit() {
   const currentBranch = getRepositoryBranch()
 
   try {
-
     const { message } = await inquirer.prompt({
       type: 'input',
       name: 'message',

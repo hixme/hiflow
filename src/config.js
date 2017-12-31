@@ -7,7 +7,7 @@ export const CONFIG_FILE_PATH = `${HOME}/.hiflow`
 
 function writeConfigFile(path, content) {
   return new Promise((resolve, reject) =>
-    fs.writeFile(path, content, 'utf8', err => (err ? reject(err) : resolve())));
+    fs.writeFile(path, content, 'utf8', err => (err ? reject(err) : resolve())))
 }
 
 function formatConfigForSave(configJSON = {}) {
@@ -19,10 +19,6 @@ function formatConfigForSave(configJSON = {}) {
     .join('\n')
 }
 
-function saveConfigItem(key, value) {
-  return writeConfigFile(CONFIG_FILE_PATH, formatConfigForSave({...getConfig(), key: value}))
-}
-
 function getConfigFile() {
   if (fs.existsSync(CONFIG_FILE_PATH)) {
     return fs.readFileSync(CONFIG_FILE_PATH, 'utf8')
@@ -31,20 +27,19 @@ function getConfigFile() {
   throw new Error('Config not found')
 }
 
-export function getBitbucketToken() {
-  return getConfig().BITBUCKET_TOKEN
-}
-
 function parseConfig(settings = '') {
   return settings.split('\n').reduce((memo, curr) => {
-      const key = curr.substring(0, curr.indexOf('=')).trim()
-      const value = curr.substring(curr.indexOf('=')+1).trim()
+    const key = curr.substring(0, curr.indexOf('=')).trim()
+    const value = curr.substring(curr.indexOf('=') + 1).trim()
 
-      if (key, value) {
-        memo[key] = value
+    if (key && value) {
+      return {
+        ...memo,
+        [key]: value,
       }
-      return memo
-    }, {})
+    }
+    return memo
+  }, {})
 }
 
 export function getConfig() {
@@ -54,6 +49,11 @@ export function getConfig() {
     return {}
   }
 }
+
+export function getBitbucketToken() {
+  return getConfig().BITBUCKET_TOKEN
+}
+
 
 export function promptUserSetup() {
   return inquirer.prompt([
@@ -77,10 +77,10 @@ export function promptUserSetup() {
 }
 
 function createToken(username, password) {
-  return new Buffer(`${username}:${password}`).toString('base64')
+  return Buffer.from(`${username}:${password}`, 'base64')
 }
 
-function handlePrompt({username, password}) {
+function handlePrompt({ username, password }) {
   return writeConfigFile(CONFIG_FILE_PATH, formatConfigForSave({
     ...getConfig(),
     BITBUCKET_USERNAME: username,

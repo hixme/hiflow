@@ -1,8 +1,7 @@
 #!/usr/bin/env node
-import inquirer from 'inquirer';
 import chalk from 'chalk'
 
-import { _, command, create, status, args } from './args';
+import { command, create, status } from './args'
 import { runSetup } from './config'
 import promptPullRequestCommand from './pr'
 import promptCheckoutCommand from './checkout'
@@ -20,11 +19,13 @@ switch (command) {
     break
   case 'pr':
     promptPullRequestCommand({ status, create })
-      .catch(e => {
+      .catch((e) => {
         console.log('e = ', e)
         if (e) {
           console.log(chalk.magenta('Sorry, there was an error'))
         }
       })
+    break
+  default:
     break
 }

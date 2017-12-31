@@ -2,16 +2,11 @@ import inquirer from 'inquirer'
 import chalk from 'chalk'
 
 import {
-  getRepositoryName,
-  getRepositoryRemoteUsername,
   getRepositoryBranch,
-  refreshRepo,
-  checkoutBranch,
   createBranch,
 } from './git'
 
 async function promptCheckout() {
-  let defaultType = null
   const currentBranch = getRepositoryBranch()
   console.log(chalk.cyan(`You are on the ${currentBranch} branch.`))
 

@@ -2,11 +2,11 @@
   "parser": "babel-eslint",
   "extends": [
     "plugin:flowtype/recommended",
-    "airbnb"
+    "airbnb-base"
   ],
   "env": {
     "node": true,
-    "mocha": true
+    "jest": true
   },
 
   "plugins": [
@@ -16,9 +16,7 @@
   ],
 
   "rules": {
-    "react/jsx-filename-extension": 0,
-    "react/no-multi-comp": 0,
-    "react/forbid-prop-types": 0,
     "semi" : [2, "never"]
   }
 }
+

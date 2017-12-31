@@ -1,13 +1,9 @@
 import axios from 'axios'
-import inquirer from 'inquirer'
-import chalk from 'chalk'
 
-import { HOME } from './args'
 import { getBitbucketToken } from './config'
 import {
   getRepositoryName,
   getRepositoryRemoteUsername,
-  getRepositoryBranch,
 } from './git'
 
 const BITBUCKET_TOKEN = getBitbucketToken()
@@ -36,8 +32,8 @@ export function bitbucketRequest(url, params = {}, method) {
       Authorization: `Basic ${BITBUCKET_TOKEN}`,
     },
   })
-  .then(handleResponse)
-  .catch(e => Promise.reject(handleError(e)))
+    .then(handleResponse)
+    .catch(e => Promise.reject(handleError(e)))
 }
 
 function buildAPIUrl(path) {
@@ -46,7 +42,7 @@ function buildAPIUrl(path) {
 
 // TODO: recurse to get all pages of pull requests
 export function getPullRequests() {
-  return bitbucketRequest(buildAPIUrl(`pullrequests`))
+  return bitbucketRequest(buildAPIUrl('pullrequests'))
     .then(data => data.values)
 }
 
@@ -65,7 +61,7 @@ export function getRepositoryStatuses(pullrequestId) {
 
 // TODO: recurse to get all pages of pull requests
 export function getRepositoryDefaultReviewers() {
-  return bitbucketRequest(buildAPIUrl(`default-reviewers`))
+  return bitbucketRequest(buildAPIUrl('default-reviewers'))
     .then(data => data.values)
 }
 
