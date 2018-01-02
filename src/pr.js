@@ -1,7 +1,9 @@
 import inquirer from 'inquirer'
 import chalk from 'chalk'
 
-import { getConfig } from './config'
+import {
+  getBitbucketUsername,
+} from './config'
 import {
   bitbucketRequest,
   getPullRequests,
@@ -26,7 +28,7 @@ import {
   logPRLink,
 } from './log'
 
-const CURRENT_USERNAME = getConfig().BITBUCKET_USERNAME
+const CURRENT_USERNAME = getBitbucketUsername()
 
 export function parseUserApprovals(activity) {
   return activity
@@ -169,11 +171,13 @@ async function promptCreatePullRequest() {
           type: 'checkbox',
           name: 'reviewers',
           message: 'Select your reviewers:',
-          choices: defaultReviewers.map(i => ({
-            name: i.display_name,
-            value: i.username,
-            checked: true,
-          })),
+          choices: defaultReviewers
+            .filter(u => u.username != CURRENT_USERNAME)
+            .map(i => ({
+              name: i.display_name,
+              value: i.username,
+              checked: true,
+            })),
           when: () => defaultReviewers.length,
         },
         {

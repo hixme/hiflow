@@ -54,6 +54,9 @@ export function getBitbucketToken() {
   return getConfig().BITBUCKET_TOKEN
 }
 
+export function getBitbucketUsername() {
+  return getConfig().BITBUCKET_USERNAME
+}
 
 export function promptUserSetup() {
   return inquirer.prompt([
