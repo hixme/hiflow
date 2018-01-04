@@ -6,6 +6,18 @@ import {
   createCommit,
 } from './git'
 
+export async function execCommit(message, branch) {
+  const currentBranch = branch || getRepositoryBranch()
+
+  try {
+    const fullMessage = `${currentBranch}: ${message}`
+    createCommit(fullMessage)
+    return { success: true }
+  } catch (e) {
+    throw e
+  }
+}
+
 export async function promptCommit() {
   const currentBranch = getRepositoryBranch()
 
@@ -23,10 +35,7 @@ export async function promptCommit() {
       console.log(chalk.yellow('Nailed it!'))
     }
 
-    const fullMessage = `${currentBranch}: ${message}`
-    createCommit(fullMessage)
-
-    return { success: true }
+    await execCommit(message, currentBranch)
   } catch (e) {
     throw e
   }
@@ -36,3 +45,6 @@ export function promptCommitCommand() {
   return promptCommit()
 }
 
+export function runExecCommit(arg) {
+  return execCommit(arg)
+}
