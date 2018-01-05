@@ -52,7 +52,7 @@ export async function runCommit(message) {
     return execCommit(message)
   } catch (e) {
     if (e && e.message) {
-      console.log(`Sorry, we could not commit your message.\n${chalk.magenta(e.message)}`)
+      console.log(chalk.magenta(e.message))
       if (e.message.startsWith('Command failed')) {
         console.log(chalk.yellow('Did you add your changes?'))
       }
