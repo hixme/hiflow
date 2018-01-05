@@ -57,7 +57,7 @@ are feature, improvement, fix, hotfix, and release.
 ![alt text](https://raw.githubusercontent.com/hixme/hiflow/master/images/checkout-step-3.png "hi checkout display")
 
 
-## hi commit
+## hi commit ["commit message"]
 
 Hiflow commit helps to prefix and format your commit messages. Currently the
 formatting prefixes your commit with the branch name. If your branch name is
@@ -65,6 +65,14 @@ formatting prefixes your commit with the branch name. If your branch name is
 
   `fix/readme: add commit description`
 
+```bash
+# will prompt you for the commit message
+hi commit
+
+# bypasses the prompt and uses the supplied message
+hi commit "my commit message"
+
+```
 
 ![alt text](https://raw.githubusercontent.com/hixme/hiflow/master/images/commit-step-1.png "hi commit display")
 
