@@ -64,7 +64,7 @@
     "test:watch": "jest --watch",
     "test:examples": "node examples/",
     "cover": "cross-env BABEL_ENV=commonjs istanbul cover _mocha -- --compilers js:babel-register --recursive",
-    "lint": "eslint src test",
+    "lint": "eslint src",
     "lint:fix": "npm run lint -- --fix",
     "build": "cross-env BABEL_ENV=commonjs babel src --out-dir bin --source-maps",
     "flow": "flow",
