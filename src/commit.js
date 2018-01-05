@@ -6,6 +6,18 @@ import {
   createCommit,
 } from './git'
 
+export function formatMessage({ message, branch }) {
+  return `${branch}: ${message}`
+}
+
+export function execCommit(message) {
+  const branch = getRepositoryBranch()
+  const commitMessage = formatMessage({ message, branch })
+  const result = createCommit(commitMessage)
+  console.log(result)
+  return result
+}
+
 export async function promptCommit() {
   const currentBranch = getRepositoryBranch()
 
@@ -23,8 +35,7 @@ export async function promptCommit() {
       console.log(chalk.yellow('Nailed it!'))
     }
 
-    const fullMessage = `${currentBranch}: ${message}`
-    createCommit(fullMessage)
+    execCommit(message)
 
     return { success: true }
   } catch (e) {
@@ -32,7 +43,22 @@ export async function promptCommit() {
   }
 }
 
-export function promptCommitCommand() {
-  return promptCommit()
-}
+export async function runCommit(message) {
+  try {
+    if (!message) {
+      return await promptCommit()
+    }
 
+    return execCommit(message)
+  } catch (e) {
+    if (e && e.message) {
+      console.log(chalk.magenta(e.message))
+      if (e.message.startsWith('Command failed')) {
+        console.log(chalk.yellow('Did you add your changes?'))
+      }
+    } else {
+      console.log(chalk.yellow('There was an unknown error.'))
+    }
+    return ''
+  }
+}

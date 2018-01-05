@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import chalk from 'chalk'
 
-import { command, create, status } from './args'
+import { command, create, status, action } from './args'
 
 /* eslint-disable  global-require */
 switch (command) {
@@ -11,8 +11,8 @@ switch (command) {
     break
   }
   case 'commit': {
-    const { promptCommitCommand } = require('./commit')
-    promptCommitCommand()
+    const { runCommit } = require('./commit')
+    runCommit(action)
     break
   }
   case 'checkout': {
