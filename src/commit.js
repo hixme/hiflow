@@ -40,10 +40,15 @@ export async function promptCommit() {
   }
 }
 
-export function runCommit(message) {
-  if (!message) {
-    return promptCommit()
-  }
+export async function runCommit(message) {
+  try {
+    if (!message) {
+      return await promptCommit()
+    }
 
-  return execCommit(message)
+    return execCommit(message)
+  } catch (e) {
+    console.log(chalk.yellow('There was an error. Did you add your changes?'))
+    return ''
+  }
 }
