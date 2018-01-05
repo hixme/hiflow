@@ -6,16 +6,13 @@ import {
   createCommit,
 } from './git'
 
-export async function execCommit(message, branch) {
-  const currentBranch = branch || getRepositoryBranch()
+export function formatMessage({ message, branch }) {
+  return `${branch}: ${message}`
+}
 
-  try {
-    const fullMessage = `${currentBranch}: ${message}`
-    createCommit(fullMessage)
-    return { success: true }
-  } catch (e) {
-    throw e
-  }
+export function execCommit(message) {
+  const branch = getRepositoryBranch()
+  return createCommit(formatMessage({ message, branch }))
 }
 
 export async function promptCommit() {
