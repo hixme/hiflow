@@ -12,7 +12,9 @@ export function formatMessage({ message, branch }) {
 
 export function execCommit(message) {
   const branch = getRepositoryBranch()
-  return createCommit(formatMessage({ message, branch }))
+  const commitMessage = formatMessage({ message, branch })
+  createCommit(commitMessage)
+  console.log(`committed! ${chalk.green(commitMessage)}`)
 }
 
 export async function promptCommit() {
