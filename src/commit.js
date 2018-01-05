@@ -32,16 +32,18 @@ export async function promptCommit() {
       console.log(chalk.yellow('Nailed it!'))
     }
 
-    await execCommit(message, currentBranch)
+    execCommit(message)
+
+    return { success: true }
   } catch (e) {
     throw e
   }
 }
 
-export function promptCommitCommand() {
-  return promptCommit()
-}
+export function runCommit(message) {
+  if (!message) {
+    return promptCommit()
+  }
 
-export function runExecCommit(arg) {
-  return execCommit(arg)
+  return execCommit(message)
 }

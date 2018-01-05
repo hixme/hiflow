@@ -11,13 +11,8 @@ switch (command) {
     break
   }
   case 'commit': {
-    if (action) {
-      const { runExecCommit } = require('./commit')
-      runExecCommit(action)
-    } else {
-      const { promptCommitCommand } = require('./commit')
-      promptCommitCommand()
-    }
+    const { runCommit } = require('./commit')
+    runCommit(action)
     break
   }
   case 'checkout': {
