@@ -14,7 +14,7 @@ export function execCommit(message) {
   const branch = getRepositoryBranch()
   const commitMessage = formatMessage({ message, branch })
   const result = createCommit(commitMessage)
-  console.log(result)
+  console.log(result.trim())
   return result
 }
 
