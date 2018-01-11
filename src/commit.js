@@ -27,6 +27,7 @@ export function execCommit(message) {
 
 export async function promptCommit({ message, smart } = {}) {
   const currentBranch = getRepositoryBranch()
+  const initialMessage = typeof smart === 'string' ? smart : message
   let smartMessage
 
   try {
@@ -35,10 +36,10 @@ export async function promptCommit({ message, smart } = {}) {
       name: 'addmessage',
       message: `${currentBranch}:`,
       validate: val => !!val,
-      when: () => !message,
+      when: () => !initialMessage,
     })
 
-    const commitMessage = message || addmessage
+    const commitMessage = initialMessage || addmessage
 
     if (smart) {
       const issueName = getIssueFromBranch(currentBranch)
