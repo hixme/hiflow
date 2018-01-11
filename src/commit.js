@@ -20,7 +20,7 @@ export function execCommit(message) {
   return result
 }
 
-export async function promptCommit() {
+export async function promptCommit(useMessage) {
   const currentBranch = getRepositoryBranch()
 
   try {
@@ -29,7 +29,7 @@ export async function promptCommit() {
       name: 'message',
       message: `${currentBranch}:`,
       validate: val => !!val,
-      when: () => true,
+      when: () => !useMessage,
     })
 
     await inquirer.prompt({
@@ -54,11 +54,7 @@ export async function promptCommit() {
 
 export async function runCommit(message) {
   try {
-    if (!message) {
-      return await promptCommit()
-    }
-
-    return execCommit(message)
+    return await promptCommit(message)
   } catch (e) {
     if (e && e.message) {
       console.log(chalk.magenta(e.message))
