@@ -51,6 +51,7 @@ export async function promptCommit(useMessage) {
     }
 
     const completeMessage = `${commitMessage}${(appendTime ? `\n\n#time ${appendTime}` : '')}`
+    execCommit(completeMessage)
 
     const randomNum = Math.ceil(Math.random() * 10)
     if ([3, 7].includes(randomNum)) {
@@ -59,8 +60,6 @@ export async function promptCommit(useMessage) {
     if ([2, 5].includes(randomNum)) {
       console.log(chalk.cyan('Mmmm, the people are gonna like that!'))
     }
-
-    execCommit(completeMessage)
 
     return { success: true }
   } catch (e) {
