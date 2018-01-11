@@ -33,6 +33,8 @@ export async function promptCommit(useMessage) {
       when: () => !useMessage,
     })
 
+    const commitMessage = useMessage || message
+
     if (allowSmartCommits()) {
       const { time } = await inquirer.prompt({
         type: 'input',
@@ -48,7 +50,8 @@ export async function promptCommit(useMessage) {
       }
     }
 
-    return
+    const completeMessage = `${commitMessage}${(appendTime ? `\n\n#time ${appendTime}` : '')}`
+
     const randomNum = Math.ceil(Math.random() * 10)
     if ([3, 7].includes(randomNum)) {
       console.log(chalk.yellow('Nailed it!'))
@@ -57,7 +60,7 @@ export async function promptCommit(useMessage) {
       console.log(chalk.cyan('Mmmm, the people are gonna like that!'))
     }
 
-    execCommit(message)
+    execCommit(completeMessage)
 
     return { success: true }
   } catch (e) {
