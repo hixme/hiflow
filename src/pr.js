@@ -116,9 +116,11 @@ async function promptCreatePullRequest() {
       return true
     }
 
-    const [repository, defaultReviewers] = await Promise.all([
+    const [repository, defaultReviewers = []] = await Promise.all([
       getRepository(),
-      getRepositoryDefaultReviewers(),
+      // if default reviewers has an error, skip this step
+      // by giving an empty list
+      getRepositoryDefaultReviewers().catch(() => []),
     ])
 
     if (repository) {
@@ -172,7 +174,7 @@ async function promptCreatePullRequest() {
           name: 'reviewers',
           message: 'Select your reviewers:',
           choices: defaultReviewers
-            .filter(u => u.username != CURRENT_USERNAME)
+            .filter(u => u.username !== CURRENT_USERNAME)
             .map(i => ({
               name: i.display_name,
               value: i.username,
