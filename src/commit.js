@@ -32,16 +32,25 @@ export async function promptCommit(useMessage) {
       when: () => !useMessage,
     })
 
-    await inquirer.prompt({
-      type: 'input',
-      name: 'time',
-      message: 'How much time have you spent? w/d/h/m',
-      when: allowSmartCommits,
-    })
+    if (allowSmartCommits()) {
+      const { time } = await inquirer.prompt({
+        type: 'input',
+        name: 'time',
+        message: 'How much time have you spent?\nweek/day/hour/minute/none: 1w, 2d, 4h, 10m, or n',
+      })
 
+      if (['none', 'n'].includes(time.toLowerCase())) {
+        console.log(chalk.magenta('No time was tracked'))
+      }
+    }
+
+    return
     const randomNum = Math.ceil(Math.random() * 10)
     if ([3, 7].includes(randomNum)) {
       console.log(chalk.yellow('Nailed it!'))
+    }
+    if ([2, 5].includes(randomNum)) {
+      console.log(chalk.cyan('Mmmm, the people are gonna like that!'))
     }
 
     execCommit(message)
