@@ -8,6 +8,11 @@ import {
   createCommit,
 } from './git'
 
+export function getIssueFromBranch(branch) {
+  const [type, issue] = branch.split('/')
+  return issue
+}
+
 export function formatMessage({ message, branch }) {
   return `${branch}: ${message}`
 }
@@ -20,37 +25,50 @@ export function execCommit(message) {
   return result
 }
 
-export async function promptCommit(useMessage) {
+export async function promptCommit({ message, smart } = {}) {
   const currentBranch = getRepositoryBranch()
-  let appendTime
+  let smartMessage
 
   try {
-    const { message } = await inquirer.prompt({
+    const { addmessage } = await inquirer.prompt({
       type: 'input',
-      name: 'message',
+      name: 'addmessage',
       message: `${currentBranch}:`,
       validate: val => !!val,
-      when: () => !useMessage,
+      when: () => !message,
     })
 
-    const commitMessage = useMessage || message
+    const commitMessage = message || addmessage
 
-    if (allowSmartCommits()) {
+    if (smart) {
+      const issueName = getIssueFromBranch(currentBranch)
+
+      const { issue } = await inquirer.prompt({
+        type: 'input',
+        name: 'issue',
+        message: 'Issue:',
+        default: issueName,
+        validate: val => !!val,
+        when: () => true,
+      })
+
       const { time } = await inquirer.prompt({
         type: 'input',
         name: 'time',
         message: 'How much time have you spent? w/d/h/m/(s)kip',
         default: 'skip',
+        validate: val => !!val,
+        when: () => true,
       })
 
       if (time.includes('w') || time.includes('d') || time.includes('h') || time.includes('m')) {
-        appendTime = time
+        smartMessage = `${issue} #time ${time}`
       } else {
         console.log(chalk.magenta('No time was tracked'))
       }
     }
 
-    const completeMessage = `${commitMessage}${(appendTime ? `\n\n#time ${appendTime}` : '')}`
+    const completeMessage = `${commitMessage}${(smartMessage ? `\n\n${smartMessage}` : '')}`
     execCommit(completeMessage)
 
     const randomNum = Math.ceil(Math.random() * 10)
@@ -67,9 +85,9 @@ export async function promptCommit(useMessage) {
   }
 }
 
-export async function runCommit(message) {
+export async function runCommit(args) {
   try {
-    return await promptCommit(message)
+    return await promptCommit(args)
   } catch (e) {
     if (e && e.message) {
       console.log(chalk.magenta(e.message))
