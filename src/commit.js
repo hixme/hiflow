@@ -1,10 +1,17 @@
 import inquirer from 'inquirer'
 import chalk from 'chalk'
-
+import {
+  allowSmartCommits,
+} from './config'
 import {
   getRepositoryBranch,
   createCommit,
 } from './git'
+
+export function getIssueFromBranch(branch) {
+  const [type, issue] = branch.split('/')
+  return issue
+}
 
 export function formatMessage({ message, branch }) {
   return `${branch}: ${message}`
@@ -18,24 +25,60 @@ export function execCommit(message) {
   return result
 }
 
-export async function promptCommit() {
+export async function promptCommit({ message, smart } = {}) {
   const currentBranch = getRepositoryBranch()
+  const initialMessage = typeof smart === 'string' ? smart : message
+  let smartMessage
 
   try {
-    const { message } = await inquirer.prompt({
+    const { addmessage } = await inquirer.prompt({
       type: 'input',
-      name: 'message',
+      name: 'addmessage',
       message: `${currentBranch}:`,
       validate: val => !!val,
-      when: () => true,
+      when: () => !initialMessage,
     })
+
+    const commitMessage = initialMessage || addmessage
+
+    if (smart) {
+      const issueName = getIssueFromBranch(currentBranch)
+
+      const { issue } = await inquirer.prompt({
+        type: 'input',
+        name: 'issue',
+        message: 'Issue:',
+        default: issueName,
+        validate: val => !!val,
+        when: () => true,
+      })
+
+      const { time } = await inquirer.prompt({
+        type: 'input',
+        name: 'time',
+        message: 'How much time have you spent? w/d/h/m/(s)kip',
+        default: 'skip',
+        validate: val => !!val,
+        when: () => true,
+      })
+
+      if (time.includes('w') || time.includes('d') || time.includes('h') || time.includes('m')) {
+        smartMessage = `${issue} #time ${time}`
+      } else {
+        console.log(chalk.magenta('No time was tracked'))
+      }
+    }
+
+    const completeMessage = `${commitMessage}${(smartMessage ? `\n\n${smartMessage}` : '')}`
+    execCommit(completeMessage)
 
     const randomNum = Math.ceil(Math.random() * 10)
     if ([3, 7].includes(randomNum)) {
       console.log(chalk.yellow('Nailed it!'))
     }
-
-    execCommit(message)
+    if ([2, 5].includes(randomNum)) {
+      console.log(chalk.cyan('Mmmm, the people are gonna like that!'))
+    }
 
     return { success: true }
   } catch (e) {
@@ -43,13 +86,9 @@ export async function promptCommit() {
   }
 }
 
-export async function runCommit(message) {
+export async function runCommit(args) {
   try {
-    if (!message) {
-      return await promptCommit()
-    }
-
-    return execCommit(message)
+    return await promptCommit(args)
   } catch (e) {
     if (e && e.message) {
       console.log(chalk.magenta(e.message))

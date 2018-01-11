@@ -83,7 +83,7 @@ function createToken(username, password) {
   return Buffer.from(`${username}:${password}`).toString('base64')
 }
 
-function handlePrompt({ username, password }) {
+function handlePrompt({ username, password, smartcommits }) {
   return writeConfigFile(CONFIG_FILE_PATH, formatConfigForSave({
     ...getConfig(),
     BITBUCKET_USERNAME: username,
