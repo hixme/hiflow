@@ -58,10 +58,6 @@ export function getBitbucketUsername() {
   return getConfig().BITBUCKET_USERNAME
 }
 
-export function allowSmartCommits() {
-  return getConfig().SMART_COMMITS === 'yes'
-}
-
 export function promptUserSetup() {
   return inquirer.prompt([
     {
@@ -80,14 +76,6 @@ export function promptUserSetup() {
       filter: val => val.trim(),
       when: () => true,
     },
-    {
-      type: 'confirm',
-      name: 'smartcommits',
-      message: 'Enable smart commits?',
-      validate: val => !!val,
-      filter: val => val.trim(),
-      when: () => true,
-    },
   ])
 }
 
@@ -100,7 +88,6 @@ function handlePrompt({ username, password, smartcommits }) {
     ...getConfig(),
     BITBUCKET_USERNAME: username,
     BITBUCKET_TOKEN: createToken(username, password),
-    SMART_COMMITS: smartcommits ? 'yes' : 'no',
   }))
 }
 
