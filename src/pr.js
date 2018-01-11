@@ -174,7 +174,7 @@ async function promptCreatePullRequest() {
           name: 'reviewers',
           message: 'Select your reviewers:',
           choices: defaultReviewers
-            .filter(u => u.username != CURRENT_USERNAME)
+            .filter(u => u.username !== CURRENT_USERNAME)
             .map(i => ({
               name: i.display_name,
               value: i.username,
