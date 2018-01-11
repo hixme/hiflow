@@ -1,6 +1,8 @@
 import inquirer from 'inquirer'
 import chalk from 'chalk'
-
+import {
+  allowSmartCommits,
+} from './config'
 import {
   getRepositoryBranch,
   createCommit,
@@ -28,6 +30,13 @@ export async function promptCommit() {
       message: `${currentBranch}:`,
       validate: val => !!val,
       when: () => true,
+    })
+
+    await inquirer.prompt({
+      type: 'input',
+      name: 'time',
+      message: 'How much time have you spent? w/d/h/m',
+      when: allowSmartCommits,
     })
 
     const randomNum = Math.ceil(Math.random() * 10)
