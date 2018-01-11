@@ -76,6 +76,14 @@ export function promptUserSetup() {
       filter: val => val.trim(),
       when: () => true,
     },
+    {
+      type: 'confirm',
+      name: 'smartcommits',
+      message: 'Enable smart commits?',
+      validate: val => !!val,
+      filter: val => val.trim(),
+      when: () => true,
+    },
   ])
 }
 
@@ -83,11 +91,12 @@ function createToken(username, password) {
   return Buffer.from(`${username}:${password}`).toString('base64')
 }
 
-function handlePrompt({ username, password }) {
+function handlePrompt({ username, password, smartcommits }) {
   return writeConfigFile(CONFIG_FILE_PATH, formatConfigForSave({
     ...getConfig(),
     BITBUCKET_USERNAME: username,
     BITBUCKET_TOKEN: createToken(username, password),
+    SMART_COMMITS: smartcommits ? 'yes' : 'no',
   }))
 }
 
