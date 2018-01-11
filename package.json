@@ -70,5 +70,9 @@
     "flow": "flow",
     "prepublish": "npm run clean && npm run build && npm run test"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hixme/hiflow.git"
+  },
   "license": "MIT"
 }
