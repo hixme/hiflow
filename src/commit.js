@@ -22,6 +22,7 @@ export function execCommit(message) {
 
 export async function promptCommit(useMessage) {
   const currentBranch = getRepositoryBranch()
+  let appendTime
 
   try {
     const { message } = await inquirer.prompt({
@@ -36,10 +37,13 @@ export async function promptCommit(useMessage) {
       const { time } = await inquirer.prompt({
         type: 'input',
         name: 'time',
-        message: 'How much time have you spent?\nweek/day/hour/minute/none: 1w, 2d, 4h, 10m, or n',
+        message: 'How much time have you spent? w/d/h/m/(s)kip',
+        default: 'skip',
       })
 
-      if (['none', 'n'].includes(time.toLowerCase())) {
+      if (time.includes('w') || time.includes('d') || time.includes('h') || time.includes('m')) {
+        appendTime = time
+      } else {
         console.log(chalk.magenta('No time was tracked'))
       }
     }
