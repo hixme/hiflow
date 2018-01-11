@@ -58,6 +58,10 @@ export function getBitbucketUsername() {
   return getConfig().BITBUCKET_USERNAME
 }
 
+export function allowSmartCommits() {
+  return getConfig().SMART_COMMITS === 'yes'
+}
+
 export function promptUserSetup() {
   return inquirer.prompt([
     {
