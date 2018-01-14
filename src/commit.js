@@ -1,7 +1,7 @@
 import inquirer from 'inquirer'
 import chalk from 'chalk'
 import {
-  allowSmartCommits,
+  requireSmartCommits,
 } from './config'
 import {
   getBranch,
@@ -41,7 +41,7 @@ export async function promptCommit({ message, smart } = {}) {
 
     const commitMessage = initialMessage || addmessage
 
-    if (smart) {
+    if (requireSmartCommits() || smart) {
       const issueName = getIssueFromBranch(currentBranch)
 
       const { issue } = await inquirer.prompt({
