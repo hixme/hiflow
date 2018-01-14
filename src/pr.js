@@ -14,11 +14,11 @@ import {
 } from './bitbucket'
 
 import {
-  getRepositoryRemoteURL,
-  getRepositoryBranch,
-  refreshRepo,
+  getRemoteURL,
+  getBranch,
+  pullAndRebase,
   checkoutBranch,
-} from './git'
+} from './git-cli'
 
 import {
   logPRHeader,
@@ -69,7 +69,7 @@ async function getPullRequestActions(pr) {
   const approvalMethod = hasApproved ? 'delete' : 'post'
 
   return {
-    checkout: () => refreshRepo && checkoutBranch(pr.source.branch.name),
+    checkout: () => pullAndRebase && checkoutBranch(pr.source.branch.name),
     [approvalType]: () => bitbucketRequest(pr.links.approve.href, {}, approvalMethod),
     decline: () => bitbucketRequest(pr.links.decline.href, {}, 'post'),
     // comment: () => promptComment(pr.id),
@@ -94,7 +94,7 @@ export function promptComment() {
 }
 
 async function promptCreatePullRequest() {
-  const currentBranch = getRepositoryBranch()
+  const currentBranch = getBranch()
   const prObj = {
     source: { branch: { name: currentBranch } },
     title: '',
@@ -344,7 +344,7 @@ async function promptPullRequestList() {
 }
 
 export function promptPullRequestCommand({ create, status }) {
-  if (!getRepositoryRemoteURL().includes('bitbucket')) {
+  if (!getRemoteURL().includes('bitbucket')) {
     console.log(chalk.cyan('hi pr currently supported with bitbucket only'))
     return Promise.resolve(true)
   }
