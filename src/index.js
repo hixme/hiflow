@@ -37,6 +37,11 @@ switch (command) {
     console.log(pkg.version)
     break
   }
+  case 'jira': {
+    const jira = require('./jira')
+    jira()
+    break
+  }
   default:
     break
 }
