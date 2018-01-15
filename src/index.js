@@ -40,6 +40,12 @@ switch (command) {
   case 'jira': {
     const jira = require('./jira')
     jira()
+      .catch((e) => {
+        console.log('e = ', e)
+        if (e) {
+          console.log(chalk.magenta('Sorry, there was an error'))
+        }
+      })
     break
   }
   default:
