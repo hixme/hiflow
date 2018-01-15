@@ -1,12 +1,12 @@
 import inquirer from 'inquirer'
 import chalk from 'chalk'
 import {
-  allowSmartCommits,
+  requireSmartCommits,
 } from './config'
 import {
-  getRepositoryBranch,
+  getBranch,
   createCommit,
-} from './git'
+} from './git-cli'
 
 export function getIssueFromBranch(branch) {
   const [type, issue] = branch.split('/')
@@ -18,7 +18,7 @@ export function formatMessage({ message, branch }) {
 }
 
 export function execCommit(message) {
-  const branch = getRepositoryBranch()
+  const branch = getBranch()
   const commitMessage = formatMessage({ message, branch })
   const result = createCommit(commitMessage)
   console.log(result)
@@ -26,7 +26,7 @@ export function execCommit(message) {
 }
 
 export async function promptCommit({ message, smart } = {}) {
-  const currentBranch = getRepositoryBranch()
+  const currentBranch = getBranch()
   const initialMessage = typeof smart === 'string' ? smart : message
   let smartMessage
 
@@ -41,7 +41,7 @@ export async function promptCommit({ message, smart } = {}) {
 
     const commitMessage = initialMessage || addmessage
 
-    if (smart) {
+    if (requireSmartCommits() || smart) {
       const issueName = getIssueFromBranch(currentBranch)
 
       const { issue } = await inquirer.prompt({

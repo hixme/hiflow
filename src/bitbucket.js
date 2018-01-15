@@ -2,13 +2,13 @@ import axios from 'axios'
 
 import { getBitbucketToken } from './config'
 import {
-  getRepositoryName,
-  getRepositoryRemoteUsername,
-} from './git'
+  getRemoteRepositoryName,
+  getRemoteUsername,
+} from './git-cli'
 
 const BITBUCKET_TOKEN = getBitbucketToken()
-const GIT_REPO_NAME = getRepositoryName()
-const GIT_REPO_ORIGIN_USERNAME = getRepositoryRemoteUsername()
+const GIT_REPO_NAME = getRemoteRepositoryName()
+const GIT_REPO_ORIGIN_USERNAME = getRemoteUsername()
 const BITBUCKET_API_BASEURL = `https://bitbucket.org/!api/2.0/repositories/${GIT_REPO_ORIGIN_USERNAME}/${GIT_REPO_NAME}`
 
 function handleResponse(response) {
