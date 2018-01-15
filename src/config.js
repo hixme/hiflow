@@ -62,7 +62,20 @@ export function requireSmartCommits() {
   return getConfig().SMART_COMMITS === 'always'
 }
 
+export function getJiraHost() {
+  return getConfig().JIRA_HOST
+}
+
+export function getJiraUsername() {
+  return getConfig().JIRA_USERNAME
+}
+
+export function getJiraToken() {
+  return getConfig().JIRA_TOKEN
+}
+
 export function promptUserSetup() {
+  console.log('promptUserSetup = ')
   return inquirer.prompt([
     {
       type: 'input',
