@@ -75,12 +75,12 @@ export function getJiraToken() {
 }
 
 export function promptUserSetup() {
-  console.log('promptUserSetup = ')
   return inquirer.prompt([
     {
       type: 'input',
       name: 'username',
       message: 'What\'s your bitbucket username?',
+      default: getBitbucketUsername(),
       validate: val => !!val,
       filter: val => val.trim(),
       when: () => true,
@@ -105,6 +105,7 @@ export function promptUserSetup() {
       type: 'input',
       name: 'jirahost',
       message: 'What\'s your JIRA host name?',
+      default: getJiraHost(),
       validate: val => !!val,
       filter: val => val.trim(),
       when: () => true,
@@ -112,6 +113,7 @@ export function promptUserSetup() {
     {
       type: 'input',
       name: 'jirausername',
+      default: getJiraUsername(),
       message: 'What\'s your JIRA username?',
       validate: val => !!val,
       filter: val => val.trim(),
