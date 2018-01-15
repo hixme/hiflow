@@ -88,6 +88,30 @@ export function promptUserSetup() {
       filter: val => val.trim(),
       when: () => true,
     },
+    {
+      type: 'input',
+      name: 'jirahost',
+      message: 'What\'s your JIRA host name?',
+      validate: val => !!val,
+      filter: val => val.trim(),
+      when: () => true,
+    },
+    {
+      type: 'input',
+      name: 'jirausername',
+      message: 'What\'s your JIRA username?',
+      validate: val => !!val,
+      filter: val => val.trim(),
+      when: () => true,
+    },
+    {
+      type: 'password',
+      name: 'jirapassword',
+      message: 'What\'s your JIRA password?',
+      validate: val => !!val,
+      filter: val => val.trim(),
+      when: () => true,
+    },
   ])
 }
 
@@ -95,12 +119,22 @@ function createToken(username, password) {
   return Buffer.from(`${username}:${password}`).toString('base64')
 }
 
-function handlePrompt({ username, password, smartcommits }) {
+function handlePrompt({
+  username,
+  password,
+  smartcommits,
+  jirahost,
+  jirausername,
+  jirapassword,
+}) {
   return writeConfigFile(CONFIG_FILE_PATH, formatConfigForSave({
     ...getConfig(),
     BITBUCKET_USERNAME: username,
     BITBUCKET_TOKEN: createToken(username, password),
     SMART_COMMITS: smartcommits ? 'always' : 'optional',
+    JIRA_HOST: jirahost,
+    JIRA_USERNAME: jirausername,
+    JIRA_TOKEN: createToken(jirausername, jirapassword),
   }))
 }
 
