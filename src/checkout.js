@@ -2,12 +2,12 @@ import inquirer from 'inquirer'
 import chalk from 'chalk'
 
 import {
-  getRepositoryBranch,
+  getBranch,
   createBranch,
-} from './git'
+} from './git-cli'
 
 async function promptCheckout() {
-  const currentBranch = getRepositoryBranch()
+  const currentBranch = getBranch()
   console.log(chalk.cyan(`You are on the ${currentBranch} branch.`))
 
   try {

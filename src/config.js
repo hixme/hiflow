@@ -58,6 +58,10 @@ export function getBitbucketUsername() {
   return getConfig().BITBUCKET_USERNAME
 }
 
+export function requireSmartCommits() {
+  return getConfig().SMART_COMMITS === 'always'
+}
+
 export function promptUserSetup() {
   return inquirer.prompt([
     {
@@ -76,6 +80,14 @@ export function promptUserSetup() {
       filter: val => val.trim(),
       when: () => true,
     },
+    {
+      type: 'confirm',
+      name: 'smartcommits',
+      message: 'Require all commits to use bitbucket "smart" commits?',
+      validate: val => !!val,
+      filter: val => val.trim(),
+      when: () => true,
+    },
   ])
 }
 
@@ -88,6 +100,7 @@ function handlePrompt({ username, password, smartcommits }) {
     ...getConfig(),
     BITBUCKET_USERNAME: username,
     BITBUCKET_TOKEN: createToken(username, password),
+    SMART_COMMITS: smartcommits ? 'always' : 'optional',
   }))
 }
 

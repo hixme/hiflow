@@ -1,20 +1,18 @@
 import { execSync } from 'child_process'
 
-export function getRepositoryVersion() {
+export function getVersion() {
   return execSync('git describe --tags --abbrev=0', { encoding: 'utf8' }).trim()
 }
 
-export function getRepositoryBranch() {
+export function getBranch() {
   return execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim()
 }
 
-export function getRepositoryRemoteURL() {
+export function getRemoteURL() {
   return execSync('git config --get remote.origin.url', { encoding: 'utf8' }).trim()
 }
 
-export function getRepositoryRemoteUsername() {
-  const url = getRepositoryRemoteURL()
-
+export function getRemoteUsernameFromURL(url) {
   if (url.includes('https')) {
     return url.split('/').reverse()[1].trim()
   }
@@ -22,16 +20,24 @@ export function getRepositoryRemoteUsername() {
   return url.split(':')[1].split('/')[0].trim()
 }
 
-export function getRepositoryName() {
-  return getRepositoryRemoteURL()
+export function getRemoteUsername() {
+  return getRemoteUsernameFromURL(getRemoteURL())
+}
+
+export function getRemoteRepositoryNameFromURL(url) {
+  return url
     .split('/')
     .pop()
     .trim()
     .replace('.git', '')
 }
 
-export function refreshRepo() {
-  return execSync('git fetch', { encoding: 'utf8' })
+export function getRemoteRepositoryName() {
+  return getRemoteRepositoryNameFromURL(getRemoteURL())
+}
+
+export function pullAndRebase() {
+  return execSync('git pull --rebase', { encoding: 'utf8' })
 }
 
 export function checkoutBranch(branchName) {
