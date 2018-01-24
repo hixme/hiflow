@@ -18,8 +18,13 @@ export default function jiraAPI({ token, host } = {}, httpClient = http) {
     return request({ url: `${BASE_URL}/project` })
   }
 
+  function getIssuesForUser() {
+    return request({ url: `${BASE_URL}/search?jql=assignee=currentuser()` })
+  }
+
   return {
     request,
+    getIssuesForUser,
     getProjects,
   }
 }
