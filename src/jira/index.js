@@ -50,6 +50,7 @@ function displayProjects(res) {
     console.log('--------------------------------')
   })
 }
+
 export default function jiraCmd() {
   return jira({
     host: getJiraHost(),
