@@ -180,7 +180,7 @@ async function promptCreatePullRequest() {
               value: i.username,
               checked: true,
             })),
-          when: () => defaultReviewers.length,
+          when: () => defaultReviewers && defaultReviewers.length,
         },
         {
           type: 'input',
