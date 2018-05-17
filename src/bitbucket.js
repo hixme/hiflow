@@ -1,4 +1,5 @@
 import axios from 'axios'
+import chalk from 'chalk'
 
 import { getBitbucketToken } from './config'
 import {
@@ -62,7 +63,11 @@ export function getRepositoryStatuses(pullrequestId) {
 // TODO: recurse to get all pages of pull requests
 export function getRepositoryDefaultReviewers() {
   return bitbucketRequest(buildAPIUrl('default-reviewers'))
-    .then(data => data.values)
+    .then(data => data && data.values ? data.values : [])
+    .catch(e => {
+      console.log(chalk.yellow("You don't have access to default reviewers."))
+      return []
+    })
 }
 
 // 1.0 API no longer available. No support for 2.0
