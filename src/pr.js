@@ -212,7 +212,18 @@ async function promptCreatePullRequest() {
 
     return { success: true }
   } catch (e) {
-    console.log(e)
+    const { fields: { source } } = e || {}
+    if (source && source.length) {
+      source.forEach(m => {
+        if (m.includes('branch not found')) {
+          console.log(`\n${chalk.yellow('** Did you push your branch?')}\n`)
+        }
+        console.log(`${chalk.red('  Error: ' + m)}\n`)
+      })
+    } else {
+      console.log(e)
+    }
+
     throw e
   }
 }
