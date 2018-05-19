@@ -212,7 +212,8 @@ async function promptCreatePullRequest() {
 
     return { success: true }
   } catch (e) {
-    const { fields: { source } } = e || {}
+    const { fields } = e || {}
+    const { source = [] } = fields || {}
     if (source && source.length) {
       source.forEach(m => {
         if (m.includes('branch not found')) {
