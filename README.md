@@ -1,5 +1,7 @@
 # hiflow
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/hixme/hiflow.svg)](https://greenkeeper.io/)
+
 A tool to improve git workflows via cli. Provides pull request management
 when the repo is hosted on bitbucket.
 
