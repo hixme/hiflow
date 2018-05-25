@@ -40,6 +40,8 @@ export function parseUserApprovals(activity) {
 
 async function renderPRSummary(pullrequest) {
   try {
+    await requireLogin()
+
     const [statuses, activity] = await Promise.all([
       bitbucketRequest(pullrequest.links.statuses.href).then(({ values }) => values),
       bitbucketRequest(pullrequest.links.activity.href).then(({ values }) => values),
@@ -96,17 +98,16 @@ export function promptComment() {
 }
 
 async function promptCreatePullRequest() {
-  await requireLogin()
-
-  const currentBranch = getBranch()
-  const prObj = {
-    source: { branch: { name: currentBranch } },
-    title: '',
-    description: '',
-    reviewers: [],
-  }
-
   try {
+    await requireLogin()
+
+    const currentBranch = getBranch()
+    const prObj = {
+      source: { branch: { name: currentBranch } },
+      title: '',
+      description: '',
+      reviewers: [],
+    }
     const { createpr } = await inquirer.prompt({
       type: 'confirm',
       name: 'createpr',
@@ -245,6 +246,8 @@ export function promptRepeatActionsList() {
 
 async function runStatus() {
   try {
+    await requireLogin()
+
     const pullrequests = await getPullRequests()
     if (pullrequests.length === 0) {
       console.log(chalk.yellow('No pull requests available'))
@@ -325,6 +328,7 @@ async function promptPullRequestActions(pullrequest) {
 
 async function promptPullRequestList() {
   try {
+    await requireLogin()
     const list = await getPullRequests()
 
     if (list.length === 0) {
