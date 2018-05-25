@@ -7,7 +7,6 @@ import {
   getRemoteUsername,
 } from './git-cli'
 
-const BITBUCKET_TOKEN = getBitbucketToken()
 const GIT_REPO_NAME = getRemoteRepositoryName()
 const GIT_REPO_ORIGIN_USERNAME = getRemoteUsername()
 const BITBUCKET_API_BASEURL = `https://bitbucket.org/!api/2.0/repositories/${GIT_REPO_ORIGIN_USERNAME}/${GIT_REPO_NAME}`
@@ -24,6 +23,7 @@ function handleError(error) {
 }
 
 export function bitbucketRequest(url, params = {}, method) {
+  const BITBUCKET_TOKEN = getBitbucketToken()
   return axios({
     url,
     method: method || 'get',
