@@ -3,7 +3,9 @@ import chalk from 'chalk'
 
 import {
   getBitbucketUsername,
+  requireLogin,
 } from './config'
+
 import {
   bitbucketRequest,
   getPullRequests,
@@ -94,6 +96,8 @@ export function promptComment() {
 }
 
 async function promptCreatePullRequest() {
+  await requireLogin()
+
   const currentBranch = getBranch()
   const prObj = {
     source: { branch: { name: currentBranch } },
