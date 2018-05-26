@@ -25,9 +25,9 @@ switch (command) {
     const { promptPullRequestCommand } = require('./pr')
     promptPullRequestCommand({ status, create })
       .catch((e) => {
-        console.log('e = ', e)
+        console.log(chalk.magenta('Sorry, there was an error'))
         if (e) {
-          console.log(chalk.magenta('Sorry, there was an error'))
+          console.log(e)
         }
       })
     break
@@ -41,9 +41,9 @@ switch (command) {
     const jira = require('./jira')
     jira()
       .catch((e) => {
-        console.log('e = ', e)
+        console.log(chalk.magenta('Sorry, there was an error'))
         if (e) {
-          console.log(chalk.magenta('Sorry, there was an error'))
+          console.log(e)
         }
       })
     break
