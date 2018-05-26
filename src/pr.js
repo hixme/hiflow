@@ -99,6 +99,7 @@ export function promptComment() {
 }
 
 async function promptCreatePullRequest() {
+  const spinner = ora()
   try {
     await requireLogin()
 
@@ -122,6 +123,7 @@ async function promptCreatePullRequest() {
       return true
     }
 
+    spinner.start('Preparing pull request...')
     const [repository, defaultReviewers = []] = await Promise.all([
       getRepository(),
       // if default reviewers has an error, skip this step
@@ -129,6 +131,7 @@ async function promptCreatePullRequest() {
       getRepositoryDefaultReviewers().catch(() => []),
     ])
 
+    spinner.succeed('All set!')
     if (repository) {
       const {
         destination,
@@ -203,6 +206,7 @@ async function promptCreatePullRequest() {
         .filter(i => i && i.trim().length)
         .map(i => ({ username: i.trim() }))
 
+      spinner.start('Creating your pull request...')
       const pullRequest = await createPullRequest({
         ...prObj,
         destination: { branch: { name: destination } },
@@ -211,13 +215,16 @@ async function promptCreatePullRequest() {
         close_source_branch: closeBranch,
         reviewers: allReviewers,
       })
+      spinner.succeed('Pull request created!')
 
       console.log(`${chalk.green('Pull request created!')}`)
       logPRLink(pullRequest.links.html.href)
+    spinner.fail('Whoops!')
     }
 
     return { success: true }
   } catch (e) {
+    spinner.fail('Whoops!')
     const { fields } = e || {}
     const { source = [] } = fields || {}
     if (source && source.length) {
@@ -246,16 +253,20 @@ export function promptRepeatActionsList() {
 }
 
 async function runStatus() {
+  const spinner = ora()
   try {
     await requireLogin()
 
+    spinner.start('Getting pull requests...')
     const pullrequests = await getPullRequests()
     if (pullrequests.length === 0) {
-      console.log(chalk.yellow('No pull requests available'))
+      spinner.succeed(`${chalk.green('All clear!')}`)
+      console.log(chalk.cyan('No pull requests available.\n'))
       return true
     }
 
-    console.log(`\n${pullrequests.length} Pull request(s)`)
+    console.log('')
+    spinner.succeed(`Found ${pullrequests.length} pull request(s)`)
 
     const prGroups = await Promise.all(pullrequests.map(async (pullrequest) => {
       const [prstatus, activity] = await Promise.all([
@@ -294,13 +305,17 @@ async function runStatus() {
 
     return true
   } catch (e) {
+    spinner.fail('Whoops, something happened!')
     throw e
   }
 }
 
 async function promptPullRequestActions(pullrequest) {
+  const spinner = ora()
   try {
+    spinner.start()
     const actions = await getPullRequestActions(pullrequest)
+    spinner.stop()
     const { action } = await inquirer.prompt({
       type: 'list',
       name: 'action',
@@ -314,7 +329,9 @@ async function promptPullRequestActions(pullrequest) {
     })
 
     if (action) {
+      spinner.start()
       const data = await action()
+      spinner.succeed(`Done`)
       logPRLink(pullrequest.links.html.href)
       if (data && data.values) {
         // data.values.map((i) => console.log('i - ', JSON.stringify(i)))
@@ -323,18 +340,25 @@ async function promptPullRequestActions(pullrequest) {
 
     return null
   } catch (e) {
+    spinner.fail('Whoops, something happened')
     throw e
   }
 }
 
 async function promptPullRequestList() {
+  const spinner = ora()
   try {
     await requireLogin()
+
+    spinner.start('Getting pull requests...')
     const list = await getPullRequests()
 
     if (list.length === 0) {
-      return console.log('No pull requests found')
+      spinner.succeed(`${chalk.green('All clear!')}`)
+      console.log(chalk.cyan('No pull requests available.\n'))
+      return true
     }
+    spinner.stop()
 
     const { pullrequest } = await inquirer.prompt({
       type: 'list',
@@ -356,7 +380,9 @@ async function promptPullRequestList() {
       when: () => true,
     })
 
+    spinner.start('Getting summary...')
     await renderPRSummary(pullrequest)
+    spinner.stop()
 
     return await promptPullRequestActions(pullrequest)
   } catch (e) {
