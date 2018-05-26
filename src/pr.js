@@ -217,9 +217,7 @@ async function promptCreatePullRequest() {
       })
       spinner.succeed('Pull request created!')
 
-      console.log(`${chalk.green('Pull request created!')}`)
       logPRLink(pullRequest.links.html.href)
-    spinner.fail('Whoops!')
     }
 
     return { success: true }
@@ -234,8 +232,6 @@ async function promptCreatePullRequest() {
         }
         console.log(`${chalk.red('  Error: ' + m)}\n`)
       })
-    } else {
-      console.log(e)
     }
 
     throw e
