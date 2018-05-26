@@ -134,6 +134,18 @@ function createToken(username, password) {
   return Buffer.from(`${username}:${password}`).toString('base64')
 }
 
+export async function requireLogin() {
+  const token = getBitbucketToken()
+
+  if (!token || token.length < 1) {
+    console.log(chalk.yellow('This feature requires bitbucket access.'))
+    console.log(chalk.cyan('Let\'s login to your account!'))
+    return runSetup()
+  }
+
+  return Promise.resolve('success')
+}
+
 function handlePrompt({
   username,
   password,
