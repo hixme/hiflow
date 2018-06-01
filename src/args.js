@@ -1,5 +1,4 @@
 import yargs from 'yargs'
-import { partialRight, omitBy, mapKeys, compact } from 'lodash'
 
 const {
   argv,
