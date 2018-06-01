@@ -3,7 +3,6 @@ import chalk from 'chalk'
 
 import { command, create, status, action, smart } from './args'
 
-
 /* eslint-disable  global-require */
 switch (command) {
   case 'config': {
