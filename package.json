@@ -25,7 +25,7 @@
     "axios": "^0.18.0",
     "babel-runtime": "^6.23.0",
     "chalk": "^2.3.0",
-    "inquirer": "^5.2.0",
+    "inquirer": "^6.0.0",
     "inquirer-chalk-pipe": "^1.2.0",
     "js-yaml": "^3.9.0",
     "ora": "^2.1.0",
