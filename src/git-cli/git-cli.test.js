@@ -49,7 +49,7 @@ describe('getRemoteUsernameFromURL()', () => {
   })
 
   it('should equal billyxs', () => {
-    expect(getRemoteUsernameFromURL(MOCK_REMOTE_HTTPS_URL_2)).toBe('billyxs')
+    expect(getRemoteUsernameFromURL(MOCK_REMOTE_SSH_URL_2)).toBe('billyxs')
   })
 })
 
