@@ -70,6 +70,10 @@
     "flow": "flow",
     "prepublish": "npm run clean && npm run build && npm run test"
   },
+  "jest": {
+    "verbose": true,
+    "testURL": "http://localhost/"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hixme/hiflow.git"
