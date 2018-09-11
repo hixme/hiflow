@@ -7,7 +7,13 @@ export const CONFIG_FILE_PATH = `${HOME}/.hiflow`
 
 function writeConfigFile(path, content) {
   return new Promise((resolve, reject) =>
-    fs.writeFile(path, content, 'utf8', err => (err ? reject(err) : resolve())))
+    fs.writeFile(
+      path,
+      content,
+      'utf8',
+      (err) => (err ? reject(err) : resolve())
+    )
+  )
 }
 
 function formatConfigForSave(configJSON = {}) {
@@ -79,26 +85,26 @@ export function promptUserSetup() {
     {
       type: 'input',
       name: 'username',
-      message: 'What\'s your bitbucket username?',
+      message: "What's your bitbucket username?",
       default: getBitbucketUsername(),
-      validate: val => !!val,
-      filter: val => val.trim(),
+      validate: (val) => !!val,
+      filter: (val) => val.trim(),
       when: () => true,
     },
     {
       type: 'password',
       name: 'password',
-      message: 'What\'s your bitbucket password?',
-      validate: val => !!val,
-      filter: val => val.trim(),
+      message: "What's your bitbucket password?",
+      validate: (val) => !!val,
+      filter: (val) => val.trim(),
       when: () => true,
     },
     {
       type: 'confirm',
       name: 'smartcommits',
       message: 'Require all commits to use bitbucket "smart" commits?',
-      validate: val => !!val,
-      filter: val => val.trim(),
+      validate: (val) => !!val,
+      filter: (val) => val.trim(),
       when: () => true,
     },
     //    {
@@ -139,7 +145,7 @@ export async function requireLogin() {
 
   if (!token || token.length < 1) {
     console.log(chalk.yellow('This feature requires bitbucket access.'))
-    console.log(chalk.cyan('Let\'s login to your account!'))
+    console.log(chalk.cyan("Let's login to your account!"))
     return runSetup()
   }
 
@@ -154,23 +160,25 @@ function handlePrompt({
   //  jirausername,
   //  jirapassword,
 }) {
-  return writeConfigFile(CONFIG_FILE_PATH, formatConfigForSave({
-    ...getConfig(),
-    BITBUCKET_USERNAME: username,
-    BITBUCKET_TOKEN: createToken(username, password),
-    SMART_COMMITS: smartcommits ? 'always' : 'optional',
-    //    JIRA_HOST: jirahost,
-    //    JIRA_USERNAME: jirausername,
-    //    JIRA_TOKEN: createToken(jirausername, jirapassword),
-  }))
+  return writeConfigFile(
+    CONFIG_FILE_PATH,
+    formatConfigForSave({
+      ...getConfig(),
+      BITBUCKET_USERNAME: username,
+      BITBUCKET_TOKEN: createToken(username, password),
+      SMART_COMMITS: smartcommits ? 'always' : 'optional',
+      //    JIRA_HOST: jirahost,
+      //    JIRA_USERNAME: jirausername,
+      //    JIRA_TOKEN: createToken(jirausername, jirapassword),
+    })
+  )
 }
 
 export function runSetup() {
   return promptUserSetup()
     .then(handlePrompt)
     .then(() => {
-      console.log(chalk.cyan('Let\'s do this!'))
+      console.log(chalk.cyan("Let's do this!"))
     })
     .catch(() => {})
 }
-

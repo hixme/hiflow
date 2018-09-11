@@ -34,7 +34,9 @@ ${description}
 
 export function logPRApprovals(approvals = []) {
   if (approvals.length) {
-    console.log(`${chalk.green('\u2713')} Approved by ${approvals.join(', ')}\n`)
+    console.log(
+      `${chalk.green('\u2713')} Approved by ${approvals.join(', ')}\n`
+    )
   } else {
     console.log(`${chalk.red('\u2717')} Not yet approved \n`)
   }
