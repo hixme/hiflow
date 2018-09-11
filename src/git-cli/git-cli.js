@@ -19,7 +19,7 @@ export function getRemoteURL() {
 }
 
 export function getRemoteUsernameFromURL(url) {
-  if (url.includes('https')) {
+  if (url.startsWith('https') || url.startsWith('ssh://')) {
     return url
       .split('/')
       .reverse()[1]
