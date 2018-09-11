@@ -1,8 +1,6 @@
 import yargs from 'yargs'
 
-const {
-  argv,
-} = yargs
+const { argv } = yargs
 
 export const {
   _,

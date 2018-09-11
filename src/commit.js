@@ -1,12 +1,7 @@
 import inquirer from 'inquirer'
 import chalk from 'chalk'
-import {
-  requireSmartCommits,
-} from './config'
-import {
-  getBranch,
-  createCommit,
-} from './git-cli'
+import { requireSmartCommits } from './config'
+import { getBranch, createCommit } from './git-cli'
 
 export function getIssueFromBranch(branch) {
   const [type, issue] = branch.split('/')
@@ -35,7 +30,7 @@ export async function promptCommit({ message, smart } = {}) {
       type: 'input',
       name: 'addmessage',
       message: `${currentBranch}:`,
-      validate: val => !!val,
+      validate: (val) => !!val,
       when: () => !initialMessage,
     })
 
@@ -49,7 +44,7 @@ export async function promptCommit({ message, smart } = {}) {
         name: 'issue',
         message: 'Issue:',
         default: issueName,
-        validate: val => !!val,
+        validate: (val) => !!val,
         when: () => true,
       })
 
@@ -58,18 +53,25 @@ export async function promptCommit({ message, smart } = {}) {
         name: 'time',
         message: 'How much time have you spent? w/d/h/m/(s)kip',
         default: 'skip',
-        validate: val => !!val,
+        validate: (val) => !!val,
         when: () => true,
       })
 
-      if (time.includes('w') || time.includes('d') || time.includes('h') || time.includes('m')) {
+      if (
+        time.includes('w') ||
+        time.includes('d') ||
+        time.includes('h') ||
+        time.includes('m')
+      ) {
         smartMessage = `${issue} #time ${time}`
       } else {
         console.log(chalk.magenta('No time was tracked'))
       }
     }
 
-    const completeMessage = `${commitMessage}${(smartMessage ? `\n\n${smartMessage}` : '')}`
+    const completeMessage = `${commitMessage}${
+      smartMessage ? `\n\n${smartMessage}` : ''
+    }`
     execCommit(completeMessage)
 
     const randomNum = Math.ceil(Math.random() * 10)
