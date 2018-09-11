@@ -1,11 +1,8 @@
-import inquirer from 'inquirer'
-import chalk from 'chalk'
-import ora from 'ora'
+import inquirer from "inquirer";
+import chalk from "chalk";
+import ora from "ora";
 
-import {
-  getBitbucketUsername,
-  requireLogin,
-} from './config'
+import { getBitbucketUsername, requireLogin } from "./config";
 
 import {
   bitbucketRequest,
@@ -13,125 +10,131 @@ import {
   getRepository,
   getRepositoryDefaultReviewers,
   createPullRequest,
-  addPullRequestComment,
-} from './bitbucket'
+  addPullRequestComment
+} from "./bitbucket";
 
 import {
   getRemoteURL,
   getBranch,
   pullAndRebase,
-  checkoutBranch,
-} from './git-cli'
+  checkoutBranch
+} from "./git-cli";
 
 import {
   logPRHeader,
   logPRStatus,
   logPRDescription,
   logPRApprovals,
-  logPRLink,
-} from './log'
+  logPRLink
+} from "./log";
 
-const CURRENT_USERNAME = getBitbucketUsername()
+const CURRENT_USERNAME = getBitbucketUsername();
 
 export function parseUserApprovals(activity) {
   return activity
     .filter(({ approval }) => approval)
-    .map(({ approval }) => approval.user.username)
+    .map(({ approval }) => approval.user.username);
 }
 
 async function renderPRSummary(pullrequest) {
   try {
-    await requireLogin()
+    await requireLogin();
 
     const [statuses, activity] = await Promise.all([
-      bitbucketRequest(pullrequest.links.statuses.href).then(({ values }) => values),
-      bitbucketRequest(pullrequest.links.activity.href).then(({ values }) => values),
-    ])
+      bitbucketRequest(pullrequest.links.statuses.href).then(
+        ({ values }) => values
+      ),
+      bitbucketRequest(pullrequest.links.activity.href).then(
+        ({ values }) => values
+      )
+    ]);
 
-    logPRHeader(pullrequest)
-    logPRApprovals(parseUserApprovals(activity))
+    logPRHeader(pullrequest);
+    logPRApprovals(parseUserApprovals(activity));
 
     if (statuses && statuses.length) {
-      statuses.forEach(logPRStatus)
+      statuses.forEach(logPRStatus);
     }
 
     if (pullrequest.description.trim().length) {
-      logPRDescription(pullrequest.description)
+      logPRDescription(pullrequest.description);
     }
 
-    return true
+    return true;
   } catch (e) {
-    throw e
+    throw e;
   }
 }
 
 async function getPullRequestActions(pr) {
-  const activity = (await bitbucketRequest(pr.links.activity.href)).values
+  const activity = (await bitbucketRequest(pr.links.activity.href)).values;
 
   // based on activity, setup approve or unapprove link
-  const hasApproved = parseUserApprovals(activity).includes(CURRENT_USERNAME)
-  const approvalType = hasApproved ? 'unapprove' : 'approve'
-  const approvalMethod = hasApproved ? 'delete' : 'post'
+  const hasApproved = parseUserApprovals(activity).includes(CURRENT_USERNAME);
+  const approvalType = hasApproved ? "unapprove" : "approve";
+  const approvalMethod = hasApproved ? "delete" : "post";
 
   return {
     checkout: () => pullAndRebase && checkoutBranch(pr.source.branch.name),
-    [approvalType]: () => bitbucketRequest(pr.links.approve.href, {}, approvalMethod),
-    decline: () => bitbucketRequest(pr.links.decline.href, {}, 'post'),
+    [approvalType]: () =>
+      bitbucketRequest(pr.links.approve.href, {}, approvalMethod),
+    decline: () => bitbucketRequest(pr.links.decline.href, {}, "post"),
     // comment: () => promptComment(pr.id),
     // activity: () => bitbucketRequest(pr.links.activity.href),
-    merge: () => bitbucketRequest(pr.links.merge.href, {}, 'post'),
-    quit: () => {},
-  }
+    merge: () => bitbucketRequest(pr.links.merge.href, {}, "post"),
+    quit: () => {}
+  };
 }
 
 // not support with bitbucket API 2.0
 export function promptComment() {
-  return inquirer.prompt({
-    type: 'input',
-    name: 'comment',
-    message: 'Your comment:',
-    validate: val => !!val,
-    filter: val => val.trim(),
-    when: () => true,
-  })
+  return inquirer
+    .prompt({
+      type: "input",
+      name: "comment",
+      message: "Your comment:",
+      validate: val => !!val,
+      filter: val => val.trim(),
+      when: () => true
+    })
     .then(({ comment }) => addPullRequestComment(comment))
-    .catch(e => console.log(e))
+    .catch(e => console.log(e));
 }
 
 async function promptCreatePullRequest() {
-  const spinner = ora()
+  const spinner = ora();
   try {
-    await requireLogin()
+    await requireLogin();
 
-    const currentBranch = getBranch()
+    const currentBranch = getBranch();
     const prObj = {
       source: { branch: { name: currentBranch } },
-      title: '',
-      description: '',
-      reviewers: [],
-    }
+      title: "",
+      description: "",
+      reviewers: []
+    };
     const { createpr } = await inquirer.prompt({
-      type: 'confirm',
-      name: 'createpr',
+      type: "confirm",
+      name: "createpr",
       message: `Would you like to create a pull request for your branch ${currentBranch}?`,
       validate: val => !!val,
       filter: val => val.trim(),
-      when: () => true,
-    })
+      when: () => true
+    });
 
     if (!createpr) {
-      return true
+      return true;
     }
 
-    spinner.start('Preparing pull request...')
+    spinner.start("Preparing pull request...");
     const [repository, defaultReviewers = []] = await Promise.all([
       getRepository(),
       // if default reviewers has an error, skip this step
       // by giving an empty list
-      getRepositoryDefaultReviewers().catch(() => []),
-    ])
+      getRepositoryDefaultReviewers().catch(() => [])
+    ]);
 
-    spinner.succeed('All set!')
+    spinner.succeed("All set!");
     if (repository) {
       const {
         destination,
@@ -139,267 +142,271 @@ async function promptCreatePullRequest() {
         title,
         description,
         reviewers = [],
-        addReviewers,
+        addReviewers
       } = await inquirer.prompt([
         {
-          type: 'input',
-          name: 'destination',
-          message: 'What branch should this pull request merge into?',
+          type: "input",
+          name: "destination",
+          message: "What branch should this pull request merge into?",
           default: repository.mainbranch.name,
           validate: val => !!val,
           filter: val => val.trim(),
-          when: () => true,
+          when: () => true
         },
         {
-          type: 'confirm',
-          name: 'closeBranch',
-          message: 'Close branch on merge?',
-          when: () => true,
+          type: "confirm",
+          name: "closeBranch",
+          message: "Close branch on merge?",
+          when: () => true
         },
         {
-          type: 'input',
-          name: 'title',
-          message: 'Pull request title:',
+          type: "input",
+          name: "title",
+          message: "Pull request title:",
           default: currentBranch,
           validate: val => !!val,
           filter: val => val.trim(),
-          when: () => true,
+          when: () => true
         },
         {
-          type: 'confirm',
-          name: 'addDescription',
-          message: 'Add pull request description?',
-          when: () => true,
+          type: "confirm",
+          name: "addDescription",
+          message: "Add pull request description?",
+          when: () => true
         },
         {
-          type: 'editor',
-          name: 'description',
-          message: 'Description:',
+          type: "editor",
+          name: "description",
+          message: "Description:",
           filter: val => val.trim(),
-          when: ({ addDescription }) => addDescription,
+          when: ({ addDescription }) => addDescription
         },
         {
-          type: 'checkbox',
-          name: 'reviewers',
-          message: 'Select your reviewers:',
+          type: "checkbox",
+          name: "reviewers",
+          message: "Select your reviewers:",
           choices: defaultReviewers
             .filter(u => u.username !== CURRENT_USERNAME)
             .map(i => ({
               name: i.display_name,
               value: i.username,
-              checked: true,
+              checked: true
             })),
-          when: () => defaultReviewers && defaultReviewers.length,
+          when: () => defaultReviewers && defaultReviewers.length
         },
         {
-          type: 'input',
-          name: 'addReviewers',
-          message: 'Add reviewers? (Enter usernames as csv)',
-          filter: val => val.trim(),
-        },
-      ])
+          type: "input",
+          name: "addReviewers",
+          message: "Add reviewers? (Enter usernames as csv)",
+          filter: val => val.trim()
+        }
+      ]);
 
-      const allReviewers = [
-        ...reviewers,
-        ...addReviewers.split(','),
-      ]
+      const allReviewers = [...reviewers, ...addReviewers.split(",")]
         .filter(i => i && i.trim().length)
-        .map(i => ({ username: i.trim() }))
+        .map(i => ({ username: i.trim() }));
 
-      spinner.start('Creating your pull request...')
+      spinner.start("Creating your pull request...");
       const pullRequest = await createPullRequest({
         ...prObj,
         destination: { branch: { name: destination } },
         title,
         description,
         close_source_branch: closeBranch,
-        reviewers: allReviewers,
-      })
-      spinner.succeed('Pull request created!')
+        reviewers: allReviewers
+      });
+      spinner.succeed("Pull request created!");
 
-      logPRLink(pullRequest.links.html.href)
+      logPRLink(pullRequest.links.html.href);
     }
 
-    return { success: true }
+    return { success: true };
   } catch (e) {
-    spinner.fail('Whoops!')
-    const { fields } = e || {}
-    const { source = [] } = fields || {}
+    spinner.fail("Whoops!");
+    const { fields } = e || {};
+    const { source = [] } = fields || {};
     if (source && source.length) {
       source.forEach(m => {
-        if (m.includes('branch not found')) {
-          console.log(`\n${chalk.yellow('** Did you push your branch?')}\n`)
+        if (m.includes("branch not found")) {
+          console.log(`\n${chalk.yellow("** Did you push your branch?")}\n`);
         }
-        console.log(`${chalk.red('  Error: ' + m)}\n`)
-      })
+        console.log(`${chalk.red("  Error: " + m)}\n`);
+      });
     }
 
-    throw e
+    throw e;
   }
 }
 
 export function promptRepeatActionsList() {
   return inquirer.prompt({
-    type: 'confirm',
-    name: 'repeat',
-    message: 'See actions again?',
+    type: "confirm",
+    name: "repeat",
+    message: "See actions again?",
     validate: val => !!val,
-    when: () => true,
-  })
+    when: () => true
+  });
 }
 
 async function runStatus() {
-  const spinner = ora()
+  const spinner = ora();
   try {
-    await requireLogin()
+    await requireLogin();
 
-    spinner.start('Getting pull requests...')
-    const pullrequests = await getPullRequests()
+    spinner.start("Getting pull requests...");
+    const pullrequests = await getPullRequests();
     if (pullrequests.length === 0) {
-      spinner.succeed(`${chalk.green('All clear!')}`)
-      console.log(chalk.cyan('No pull requests available.\n'))
-      return true
+      spinner.succeed(`${chalk.green("All clear!")}`);
+      console.log(chalk.cyan("No pull requests available.\n"));
+      return true;
     }
 
-    console.log('')
-    spinner.succeed(`Found ${pullrequests.length} pull request(s)`)
+    console.log("");
+    spinner.succeed(`Found ${pullrequests.length} pull request(s)`);
 
-    const prGroups = await Promise.all(pullrequests.map(async (pullrequest) => {
-      const [prstatus, activity] = await Promise.all([
-        bitbucketRequest(pullrequest.links.statuses.href).then(({ values }) => values),
-        bitbucketRequest(pullrequest.links.activity.href).then(({ values }) => values),
-      ])
+    const prGroups = await Promise.all(
+      pullrequests.map(async pullrequest => {
+        const [prstatus, activity] = await Promise.all([
+          bitbucketRequest(pullrequest.links.statuses.href).then(
+            ({ values }) => values
+          ),
+          bitbucketRequest(pullrequest.links.activity.href).then(
+            ({ values }) => values
+          )
+        ]);
 
-      return {
-        id: pullrequest.id,
-        pullrequest,
-        statuses: prstatus,
-        approvals: parseUserApprovals(activity),
-      }
-    }))
+        return {
+          id: pullrequest.id,
+          pullrequest,
+          statuses: prstatus,
+          approvals: parseUserApprovals(activity)
+        };
+      })
+    );
 
-    prGroups.sort(pr => pr.id).forEach(({ pullrequest, statuses, approvals }, index) => {
-      if (index === 0) {
-        console.log(chalk.dim('===================================='))
-      } else {
-        console.log('-------------------------------------')
-      }
+    prGroups
+      .sort(pr => pr.id)
+      .forEach(({ pullrequest, statuses, approvals }, index) => {
+        if (index === 0) {
+          console.log(chalk.dim("===================================="));
+        } else {
+          console.log("-------------------------------------");
+        }
 
-      logPRHeader(pullrequest)
+        logPRHeader(pullrequest);
 
-      if (approvals.length) {
-        console.log(`${chalk.green('\u2713')} Approved by ${approvals.join(', ')}\n`)
-      } else {
-        console.log(`${chalk.red('\u2717')} Not yet approved \n`)
-      }
-      if (statuses && statuses.length) {
-        statuses.forEach(logPRStatus)
-      }
+        if (approvals.length) {
+          console.log(
+            `${chalk.green("\u2713")} Approved by ${approvals.join(", ")}\n`
+          );
+        } else {
+          console.log(`${chalk.red("\u2717")} Not yet approved \n`);
+        }
+        if (statuses && statuses.length) {
+          statuses.forEach(logPRStatus);
+        }
 
-      logPRLink(pullrequest.links.html.href)
-    })
+        logPRLink(pullrequest.links.html.href);
+      });
 
-    return true
+    return true;
   } catch (e) {
-    spinner.fail('Whoops, something happened!')
-    throw e
+    spinner.fail("Whoops, something happened!");
+    throw e;
   }
 }
 
 async function promptPullRequestActions(pullrequest) {
-  const spinner = ora()
+  const spinner = ora();
   try {
-    spinner.start()
-    const actions = await getPullRequestActions(pullrequest)
-    spinner.stop()
+    spinner.start();
+    const actions = await getPullRequestActions(pullrequest);
+    spinner.stop();
     const { action } = await inquirer.prompt({
-      type: 'list',
-      name: 'action',
-      message: 'What action would you like to perform?',
+      type: "list",
+      name: "action",
+      message: "What action would you like to perform?",
       choices: Object.keys(actions).map(a => ({
         name: a,
-        value: actions[a],
+        value: actions[a]
       })),
       validate: val => !!val,
-      when: () => true,
-    })
+      when: () => true
+    });
 
     if (action) {
-      spinner.start()
-      const data = await action()
-      spinner.succeed(`Done`)
-      logPRLink(pullrequest.links.html.href)
+      spinner.start();
+      const data = await action();
+      spinner.succeed(`Done`);
+      logPRLink(pullrequest.links.html.href);
       if (data && data.values) {
         // data.values.map((i) => console.log('i - ', JSON.stringify(i)))
       }
     }
 
-    return null
+    return null;
   } catch (e) {
-    spinner.fail('Whoops, something happened')
-    throw e
+    spinner.fail("Whoops, something happened");
+    throw e;
   }
 }
 
 async function promptPullRequestList() {
-  const spinner = ora()
+  const spinner = ora();
   try {
-    await requireLogin()
+    await requireLogin();
 
-    spinner.start('Getting pull requests...')
-    const list = await getPullRequests()
+    spinner.start("Getting pull requests...");
+    const list = await getPullRequests();
 
     if (list.length === 0) {
-      spinner.succeed(`${chalk.green('All clear!')}`)
-      console.log(chalk.cyan('No pull requests available.\n'))
-      return true
+      spinner.succeed(`${chalk.green("All clear!")}`);
+      console.log(chalk.cyan("No pull requests available.\n"));
+      return true;
     }
-    spinner.stop()
+    spinner.stop();
 
     const { pullrequest } = await inquirer.prompt({
-      type: 'list',
-      name: 'pullrequest',
-      message: 'Select a pull request?',
-      choices: list.map(({
-        author, state, id, title, ...pr
-      }) => ({
+      type: "list",
+      name: "pullrequest",
+      message: "Select a pull request?",
+      choices: list.map(({ author, state, id, title, ...pr }) => ({
         name: `(${state}) #${id} by ${author.display_name} - ${title}`,
         value: {
           author,
           state,
           id,
           title,
-          ...pr,
-        },
+          ...pr
+        }
       })),
       validate: val => !!val,
-      when: () => true,
-    })
+      when: () => true
+    });
 
-    spinner.start('Getting summary...')
-    await renderPRSummary(pullrequest)
-    spinner.stop()
+    spinner.start("Getting summary...");
+    await renderPRSummary(pullrequest);
+    spinner.stop();
 
-    return await promptPullRequestActions(pullrequest)
+    return await promptPullRequestActions(pullrequest);
   } catch (e) {
-    throw e
+    throw e;
   }
 }
 
 export function promptPullRequestCommand({ create, status }) {
-  if (!getRemoteURL().includes('bitbucket')) {
-    console.log(chalk.cyan('hi pr currently supported with bitbucket only'))
-    return Promise.resolve(true)
+  if (!getRemoteURL().includes("bitbucket")) {
+    console.log(chalk.cyan("hi pr currently supported with bitbucket only"));
+    return Promise.resolve(true);
   }
 
   if (create) {
-    return promptCreatePullRequest()
+    return promptCreatePullRequest();
   }
 
   if (status) {
-    return runStatus()
+    return runStatus();
   }
 
-  return promptPullRequestList()
+  return promptPullRequestList();
 }
-

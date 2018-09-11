@@ -1,30 +1,30 @@
-import http from '../http'
+import http from "../http";
 
 export default function jiraAPI({ token, host } = {}, httpClient = http) {
-  const BASE_URL = `https://${host}/rest/api/2`
+  const BASE_URL = `https://${host}/rest/api/2`;
 
   function request({ url, params = {}, method } = {}) {
     return httpClient({
       url,
       params,
       headers: {
-        Authorization: `Basic ${token}`,
+        Authorization: `Basic ${token}`
       },
-      ...(method ? { method } : {}),
-    })
+      ...(method ? { method } : {})
+    });
   }
 
   function getProjects() {
-    return request({ url: `${BASE_URL}/project` })
+    return request({ url: `${BASE_URL}/project` });
   }
 
   function getIssuesForUser() {
-    return request({ url: `${BASE_URL}/search?jql=assignee=currentuser()` })
+    return request({ url: `${BASE_URL}/search?jql=assignee=currentuser()` });
   }
 
   return {
     request,
     getIssuesForUser,
-    getProjects,
-  }
+    getProjects
+  };
 }

@@ -1,8 +1,6 @@
-import yargs from 'yargs'
+import yargs from "yargs";
 
-const {
-  argv,
-} = yargs
+const { argv } = yargs;
 
 export const {
   _,
@@ -12,14 +10,14 @@ export const {
   smart,
   status,
   ...args
-} = argv
+} = argv;
 
-export const VERBOSE = VERBOSE1 || VERBOSE2
+export const VERBOSE = VERBOSE1 || VERBOSE2;
 
-const [cliCommand = 'help', actionType] = _
+const [cliCommand = "help", actionType] = _;
 
-export const command = cliCommand
+export const command = cliCommand;
 
-export const action = actionType
+export const action = actionType;
 
-export const HOME = require('os').homedir()
+export const HOME = require("os").homedir();
