@@ -1,106 +1,107 @@
-import fs from 'fs'
-import inquirer from 'inquirer'
-import chalk from 'chalk'
-import { HOME } from './args'
+import fs from "fs";
+import inquirer from "inquirer";
+import chalk from "chalk";
+import { HOME } from "./args";
 
-export const CONFIG_FILE_PATH = `${HOME}/.hiflow`
+export const CONFIG_FILE_PATH = `${HOME}/.hiflow`;
 
 function writeConfigFile(path, content) {
   return new Promise((resolve, reject) =>
-    fs.writeFile(path, content, 'utf8', err => (err ? reject(err) : resolve())))
+    fs.writeFile(path, content, "utf8", err => (err ? reject(err) : resolve()))
+  );
 }
 
 function formatConfigForSave(configJSON = {}) {
   return Object.keys(configJSON)
     .reduce((memo, curr) => {
-      memo.push(`${curr.trim()}=${configJSON[curr].trim()}`)
-      return memo
+      memo.push(`${curr.trim()}=${configJSON[curr].trim()}`);
+      return memo;
     }, [])
-    .join('\n')
+    .join("\n");
 }
 
 function getConfigFile() {
   if (fs.existsSync(CONFIG_FILE_PATH)) {
-    return fs.readFileSync(CONFIG_FILE_PATH, 'utf8')
+    return fs.readFileSync(CONFIG_FILE_PATH, "utf8");
   }
 
-  throw new Error('Config not found')
+  throw new Error("Config not found");
 }
 
-function parseConfig(settings = '') {
-  return settings.split('\n').reduce((memo, curr) => {
-    const key = curr.substring(0, curr.indexOf('=')).trim()
-    const value = curr.substring(curr.indexOf('=') + 1).trim()
+function parseConfig(settings = "") {
+  return settings.split("\n").reduce((memo, curr) => {
+    const key = curr.substring(0, curr.indexOf("=")).trim();
+    const value = curr.substring(curr.indexOf("=") + 1).trim();
 
     if (key && value) {
       return {
         ...memo,
-        [key]: value,
-      }
+        [key]: value
+      };
     }
-    return memo
-  }, {})
+    return memo;
+  }, {});
 }
 
 export function getConfig() {
   try {
-    return parseConfig(getConfigFile()) || {}
+    return parseConfig(getConfigFile()) || {};
   } catch (e) {
-    return {}
+    return {};
   }
 }
 
 export function getBitbucketToken() {
-  return getConfig().BITBUCKET_TOKEN
+  return getConfig().BITBUCKET_TOKEN;
 }
 
 export function getBitbucketUsername() {
-  return getConfig().BITBUCKET_USERNAME
+  return getConfig().BITBUCKET_USERNAME;
 }
 
 export function requireSmartCommits() {
-  return getConfig().SMART_COMMITS === 'always'
+  return getConfig().SMART_COMMITS === "always";
 }
 
 export function getJiraHost() {
-  return getConfig().JIRA_HOST
+  return getConfig().JIRA_HOST;
 }
 
 export function getJiraUsername() {
-  return getConfig().JIRA_USERNAME
+  return getConfig().JIRA_USERNAME;
 }
 
 export function getJiraToken() {
-  return getConfig().JIRA_TOKEN
+  return getConfig().JIRA_TOKEN;
 }
 
 export function promptUserSetup() {
   return inquirer.prompt([
     {
-      type: 'input',
-      name: 'username',
-      message: 'What\'s your bitbucket username?',
+      type: "input",
+      name: "username",
+      message: "What's your bitbucket username?",
       default: getBitbucketUsername(),
       validate: val => !!val,
       filter: val => val.trim(),
-      when: () => true,
+      when: () => true
     },
     {
-      type: 'password',
-      name: 'password',
-      message: 'What\'s your bitbucket password?',
+      type: "password",
+      name: "password",
+      message: "What's your bitbucket password?",
       validate: val => !!val,
       filter: val => val.trim(),
-      when: () => true,
+      when: () => true
     },
     {
-      type: 'confirm',
-      name: 'smartcommits',
+      type: "confirm",
+      name: "smartcommits",
       message: 'Require all commits to use bitbucket "smart" commits?',
       validate: val => !!val,
       filter: val => val.trim(),
-      when: () => true,
-    },
+      when: () => true
+    }
     //    {
     //      type: 'input',
     //      name: 'jirahost',
@@ -127,50 +128,52 @@ export function promptUserSetup() {
     //      filter: val => val.trim(),
     //      when: () => true,
     //    },
-  ])
+  ]);
 }
 
 function createToken(username, password) {
-  return Buffer.from(`${username}:${password}`).toString('base64')
+  return Buffer.from(`${username}:${password}`).toString("base64");
 }
 
 export async function requireLogin() {
-  const token = getBitbucketToken()
+  const token = getBitbucketToken();
 
   if (!token || token.length < 1) {
-    console.log(chalk.yellow('This feature requires bitbucket access.'))
-    console.log(chalk.cyan('Let\'s login to your account!'))
-    return runSetup()
+    console.log(chalk.yellow("This feature requires bitbucket access."));
+    console.log(chalk.cyan("Let's login to your account!"));
+    return runSetup();
   }
 
-  return Promise.resolve('success')
+  return Promise.resolve("success");
 }
 
 function handlePrompt({
   username,
   password,
-  smartcommits,
+  smartcommits
   //  jirahost,
   //  jirausername,
   //  jirapassword,
 }) {
-  return writeConfigFile(CONFIG_FILE_PATH, formatConfigForSave({
-    ...getConfig(),
-    BITBUCKET_USERNAME: username,
-    BITBUCKET_TOKEN: createToken(username, password),
-    SMART_COMMITS: smartcommits ? 'always' : 'optional',
-    //    JIRA_HOST: jirahost,
-    //    JIRA_USERNAME: jirausername,
-    //    JIRA_TOKEN: createToken(jirausername, jirapassword),
-  }))
+  return writeConfigFile(
+    CONFIG_FILE_PATH,
+    formatConfigForSave({
+      ...getConfig(),
+      BITBUCKET_USERNAME: username,
+      BITBUCKET_TOKEN: createToken(username, password),
+      SMART_COMMITS: smartcommits ? "always" : "optional"
+      //    JIRA_HOST: jirahost,
+      //    JIRA_USERNAME: jirausername,
+      //    JIRA_TOKEN: createToken(jirausername, jirapassword),
+    })
+  );
 }
 
 export function runSetup() {
   return promptUserSetup()
     .then(handlePrompt)
     .then(() => {
-      console.log(chalk.cyan('Let\'s do this!'))
+      console.log(chalk.cyan("Let's do this!"));
     })
-    .catch(() => {})
+    .catch(() => {});
 }
-

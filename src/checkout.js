@@ -1,65 +1,55 @@
-import inquirer from 'inquirer'
-import chalk from 'chalk'
+import inquirer from "inquirer";
+import chalk from "chalk";
 
-import {
-  getBranch,
-  createBranch,
-} from './git-cli'
+import { getBranch, createBranch } from "./git-cli";
 
 async function promptCheckout() {
-  const currentBranch = getBranch()
-  console.log(chalk.cyan(`You are on the ${currentBranch} branch.`))
+  const currentBranch = getBranch();
+  console.log(chalk.cyan(`You are on the ${currentBranch} branch.`));
 
   try {
-    let branchType = null
+    let branchType = null;
 
-    if (currentBranch === 'master') {
+    if (currentBranch === "master") {
       const { doHotfix } = await inquirer.prompt({
-        type: 'confirm',
-        name: 'doHotfix',
-        message: 'Do you want to do a hotfix?',
-      })
-      console.log(doHotfix)
-      if (doHotfix) branchType = 'hotfix'
+        type: "confirm",
+        name: "doHotfix",
+        message: "Do you want to do a hotfix?"
+      });
+      console.log(doHotfix);
+      if (doHotfix) branchType = "hotfix";
     }
 
     if (!branchType) {
       const { type } = await inquirer.prompt({
-        type: 'list',
-        name: 'type',
-        message: 'What type of branch?',
-        choices: [
-          'feature',
-          'improvement',
-          'fix',
-          'hotfix',
-          'release',
-        ],
-        default: 'feature',
+        type: "list",
+        name: "type",
+        message: "What type of branch?",
+        choices: ["feature", "improvement", "fix", "hotfix", "release"],
+        default: "feature",
         validate: val => !!val,
-        when: () => true,
-      })
+        when: () => true
+      });
 
-      branchType = type
+      branchType = type;
     }
 
     const { issue } = await inquirer.prompt({
-      type: 'input',
-      name: 'issue',
-      message: branchType === 'release' ? 'Version:' : 'Issue name:',
+      type: "input",
+      name: "issue",
+      message: branchType === "release" ? "Version:" : "Issue name:",
       validate: val => !!val,
-      when: () => true,
-    })
+      when: () => true
+    });
 
-    console.log(chalk.green('Yes! I\'m excited about this.'))
-    createBranch(`${branchType}/${issue}`)
+    console.log(chalk.green("Yes! I'm excited about this."));
+    createBranch(`${branchType}/${issue}`);
 
-    return { success: true }
+    return { success: true };
   } catch (e) {
-    throw e
+    throw e;
   }
 }
 export function promptCheckoutCommand() {
-  return promptCheckout()
+  return promptCheckout();
 }
-

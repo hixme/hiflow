@@ -1,3 +1,3 @@
-import * as gitCli from './git-cli'
+import * as gitCli from "./git-cli";
 
-export default { ...gitCli }
+export default { ...gitCli };
