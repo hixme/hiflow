@@ -13,8 +13,11 @@ export function getRemoteURL() {
 }
 
 export function getRemoteUsernameFromURL(url) {
-  if (url.includes('https')) {
-    return url.split('/').reverse()[1].trim()
+  if (url.startsWith('https') || url.startsWith('ssh://')) {
+    return url
+      .split('/')
+      .reverse()[1]
+      .trim()
   }
 
   return url.split(':')[1].split('/')[0].trim()
