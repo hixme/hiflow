@@ -230,7 +230,7 @@ async function promptCreatePullRequest() {
         if (m.includes('branch not found')) {
           console.log(`\n${chalk.yellow('** Did you push your branch?')}\n`)
         }
-        console.log(`${chalk.red('  Error: ' + m)}\n`)
+        console.log(`${chalk.red(`  Error: ${m}`)}\n`)
       })
     }
 
