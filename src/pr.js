@@ -390,6 +390,7 @@ async function promptPullRequestList() {
 
     return await promptPullRequestActions(pullrequest)
   } catch (e) {
+    spinner.stop()
     throw e
   }
 }
