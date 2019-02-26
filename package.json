@@ -44,7 +44,7 @@
     "cross-env": "^5.1.5",
     "eslint": "^4.14.0",
     "eslint-config-airbnb-base": "^12.1.0",
-    "eslint-config-prettier": "^3.0.1",
+    "eslint-config-prettier": "^4.1.0",
     "eslint-plugin-flowtype": "^2.32.1",
     "eslint-plugin-import": "^2.0.0",
     "eslint-plugin-mocha": "^5.0.0",
