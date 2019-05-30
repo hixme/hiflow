@@ -22,13 +22,12 @@ switch (command) {
   }
   case 'pr': {
     const { promptPullRequestCommand } = require('./pr')
-    promptPullRequestCommand({ status, create })
-      .catch((e) => {
-        console.log(chalk.magenta('Sorry, there was an error'))
-        if (e) {
-          console.log(e)
-        }
-      })
+    promptPullRequestCommand({ status, create }).catch((e) => {
+      console.log(chalk.magenta('Sorry, there was an error'))
+      if (e) {
+        console.log(e)
+      }
+    })
     break
   }
   case 'version': {
@@ -38,13 +37,12 @@ switch (command) {
   }
   case 'jira': {
     const jira = require('./jira')
-    jira()
-      .catch((e) => {
-        console.log(chalk.magenta('Sorry, there was an error'))
-        if (e) {
-          console.log(e)
-        }
-      })
+    jira().catch((e) => {
+      console.log(chalk.magenta('Sorry, there was an error'))
+      if (e) {
+        console.log(e)
+      }
+    })
     break
   }
   default:
