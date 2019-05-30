@@ -11,9 +11,7 @@ export function handleError(error) {
   return error.response.data.error
 }
 
-export default function http({
-  url, params = {}, headers = {}, method,
-} = {}) {
+export default function http({ url, params = {}, headers = {}, method } = {}) {
   return axios({
     url,
     method: method || 'get',
@@ -24,5 +22,5 @@ export default function http({
     },
   })
     .then(handleResponse)
-    .catch(e => Promise.reject(handleError(e)))
+    .catch((e) => Promise.reject(handleError(e)))
 }
