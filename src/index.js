@@ -3,7 +3,6 @@ import chalk from 'chalk'
 
 import { command, create, status, action, smart } from './args'
 
-
 /* eslint-disable  global-require */
 switch (command) {
   case 'config': {
@@ -23,13 +22,12 @@ switch (command) {
   }
   case 'pr': {
     const { promptPullRequestCommand } = require('./pr')
-    promptPullRequestCommand({ status, create })
-      .catch((e) => {
-        console.log('e = ', e)
-        if (e) {
-          console.log(chalk.magenta('Sorry, there was an error'))
-        }
-      })
+    promptPullRequestCommand({ status, create }).catch((e) => {
+      console.log(chalk.magenta('Sorry, there was an error'))
+      if (e) {
+        console.log(e)
+      }
+    })
     break
   }
   case 'version': {
@@ -39,13 +37,12 @@ switch (command) {
   }
   case 'jira': {
     const jira = require('./jira')
-    jira()
-      .catch((e) => {
-        console.log('e = ', e)
-        if (e) {
-          console.log(chalk.magenta('Sorry, there was an error'))
-        }
-      })
+    jira().catch((e) => {
+      console.log(chalk.magenta('Sorry, there was an error'))
+      if (e) {
+        console.log(e)
+      }
+    })
     break
   }
   default:
