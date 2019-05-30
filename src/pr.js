@@ -1,9 +1,9 @@
 import inquirer from 'inquirer'
 import chalk from 'chalk'
+import ora from 'ora'
 
-import {
-  getBitbucketUsername,
-} from './config'
+import { getBitbucketUsername, requireLogin } from './config'
+
 import {
   bitbucketRequest,
   getPullRequests,
@@ -38,9 +38,15 @@ export function parseUserApprovals(activity) {
 
 async function renderPRSummary(pullrequest) {
   try {
+    await requireLogin()
+
     const [statuses, activity] = await Promise.all([
-      bitbucketRequest(pullrequest.links.statuses.href).then(({ values }) => values),
-      bitbucketRequest(pullrequest.links.activity.href).then(({ values }) => values),
+      bitbucketRequest(pullrequest.links.statuses.href).then(
+        ({ values }) => values
+      ),
+      bitbucketRequest(pullrequest.links.activity.href).then(
+        ({ values }) => values
+      ),
     ])
 
     logPRHeader(pullrequest)
@@ -70,7 +76,8 @@ async function getPullRequestActions(pr) {
 
   return {
     checkout: () => pullAndRebase && checkoutBranch(pr.source.branch.name),
-    [approvalType]: () => bitbucketRequest(pr.links.approve.href, {}, approvalMethod),
+    [approvalType]: () =>
+      bitbucketRequest(pr.links.approve.href, {}, approvalMethod),
     decline: () => bitbucketRequest(pr.links.decline.href, {}, 'post'),
     // comment: () => promptComment(pr.id),
     // activity: () => bitbucketRequest(pr.links.activity.href),
@@ -81,34 +88,37 @@ async function getPullRequestActions(pr) {
 
 // not support with bitbucket API 2.0
 export function promptComment() {
-  return inquirer.prompt({
-    type: 'input',
-    name: 'comment',
-    message: 'Your comment:',
-    validate: val => !!val,
-    filter: val => val.trim(),
-    when: () => true,
-  })
+  return inquirer
+    .prompt({
+      type: 'input',
+      name: 'comment',
+      message: 'Your comment:',
+      validate: (val) => !!val,
+      filter: (val) => val.trim(),
+      when: () => true,
+    })
     .then(({ comment }) => addPullRequestComment(comment))
-    .catch(e => console.log(e))
+    .catch((e) => console.log(e))
 }
 
 async function promptCreatePullRequest() {
-  const currentBranch = getBranch()
-  const prObj = {
-    source: { branch: { name: currentBranch } },
-    title: '',
-    description: '',
-    reviewers: [],
-  }
-
+  const spinner = ora()
   try {
+    await requireLogin()
+
+    const currentBranch = getBranch()
+    const prObj = {
+      source: { branch: { name: currentBranch } },
+      title: '',
+      description: '',
+      reviewers: [],
+    }
     const { createpr } = await inquirer.prompt({
       type: 'confirm',
       name: 'createpr',
       message: `Would you like to create a pull request for your branch ${currentBranch}?`,
-      validate: val => !!val,
-      filter: val => val.trim(),
+      validate: (val) => !!val,
+      filter: (val) => val.trim(),
       when: () => true,
     })
 
@@ -116,6 +126,7 @@ async function promptCreatePullRequest() {
       return true
     }
 
+    spinner.start('Preparing pull request...')
     const [repository, defaultReviewers = []] = await Promise.all([
       getRepository(),
       // if default reviewers has an error, skip this step
@@ -123,6 +134,7 @@ async function promptCreatePullRequest() {
       getRepositoryDefaultReviewers().catch(() => []),
     ])
 
+    spinner.succeed('All set!')
     if (repository) {
       const {
         destination,
@@ -137,8 +149,8 @@ async function promptCreatePullRequest() {
           name: 'destination',
           message: 'What branch should this pull request merge into?',
           default: repository.mainbranch.name,
-          validate: val => !!val,
-          filter: val => val.trim(),
+          validate: (val) => !!val,
+          filter: (val) => val.trim(),
           when: () => true,
         },
         {
@@ -152,8 +164,8 @@ async function promptCreatePullRequest() {
           name: 'title',
           message: 'Pull request title:',
           default: currentBranch,
-          validate: val => !!val,
-          filter: val => val.trim(),
+          validate: (val) => !!val,
+          filter: (val) => val.trim(),
           when: () => true,
         },
         {
@@ -166,7 +178,7 @@ async function promptCreatePullRequest() {
           type: 'editor',
           name: 'description',
           message: 'Description:',
-          filter: val => val.trim(),
+          filter: (val) => val.trim(),
           when: ({ addDescription }) => addDescription,
         },
         {
@@ -174,29 +186,27 @@ async function promptCreatePullRequest() {
           name: 'reviewers',
           message: 'Select your reviewers:',
           choices: defaultReviewers
-            .filter(u => u.username !== CURRENT_USERNAME)
-            .map(i => ({
+            .filter((u) => u.username !== CURRENT_USERNAME)
+            .map((i) => ({
               name: i.display_name,
               value: i.username,
               checked: true,
             })),
-          when: () => defaultReviewers.length,
+          when: () => defaultReviewers && defaultReviewers.length,
         },
         {
           type: 'input',
           name: 'addReviewers',
           message: 'Add reviewers? (Enter usernames as csv)',
-          filter: val => val.trim(),
+          filter: (val) => val.trim(),
         },
       ])
 
-      const allReviewers = [
-        ...reviewers,
-        ...addReviewers.split(','),
-      ]
-        .filter(i => i && i.trim().length)
-        .map(i => ({ username: i.trim() }))
+      const allReviewers = [...reviewers, ...addReviewers.split(',')]
+        .filter((i) => i && i.trim().length)
+        .map((i) => ({ username: i.trim() }))
 
+      spinner.start('Creating your pull request...')
       const pullRequest = await createPullRequest({
         ...prObj,
         destination: { branch: { name: destination } },
@@ -205,14 +215,25 @@ async function promptCreatePullRequest() {
         close_source_branch: closeBranch,
         reviewers: allReviewers,
       })
+      spinner.succeed('Pull request created!')
 
-      console.log(`${chalk.green('Pull request created!')}`)
       logPRLink(pullRequest.links.html.href)
     }
 
     return { success: true }
   } catch (e) {
-    console.log(e)
+    spinner.fail('Whoops!')
+    const { fields } = e || {}
+    const { source = [] } = fields || {}
+    if (source && source.length) {
+      source.forEach((m) => {
+        if (m.includes('branch not found')) {
+          console.log(`\n${chalk.yellow('** Did you push your branch?')}\n`)
+        }
+        console.log(`${chalk.red(`  Error: ${m}`)}\n`)
+      })
+    }
+
     throw e
   }
 }
@@ -222,79 +243,101 @@ export function promptRepeatActionsList() {
     type: 'confirm',
     name: 'repeat',
     message: 'See actions again?',
-    validate: val => !!val,
+    validate: (val) => !!val,
     when: () => true,
   })
 }
 
 async function runStatus() {
+  const spinner = ora()
   try {
+    await requireLogin()
+
+    spinner.start('Getting pull requests...')
     const pullrequests = await getPullRequests()
     if (pullrequests.length === 0) {
-      console.log(chalk.yellow('No pull requests available'))
+      spinner.succeed(`${chalk.green('All clear!')}`)
+      console.log(chalk.cyan('No pull requests available.\n'))
       return true
     }
 
-    console.log(`\n${pullrequests.length} Pull request(s)`)
+    console.log('')
+    spinner.succeed(`Found ${pullrequests.length} pull request(s)`)
 
-    const prGroups = await Promise.all(pullrequests.map(async (pullrequest) => {
-      const [prstatus, activity] = await Promise.all([
-        bitbucketRequest(pullrequest.links.statuses.href).then(({ values }) => values),
-        bitbucketRequest(pullrequest.links.activity.href).then(({ values }) => values),
-      ])
+    const prGroups = await Promise.all(
+      pullrequests.map(async (pullrequest) => {
+        const [prstatus, activity] = await Promise.all([
+          bitbucketRequest(pullrequest.links.statuses.href).then(
+            ({ values }) => values
+          ),
+          bitbucketRequest(pullrequest.links.activity.href).then(
+            ({ values }) => values
+          ),
+        ])
 
-      return {
-        id: pullrequest.id,
-        pullrequest,
-        statuses: prstatus,
-        approvals: parseUserApprovals(activity),
-      }
-    }))
+        return {
+          id: pullrequest.id,
+          pullrequest,
+          statuses: prstatus,
+          approvals: parseUserApprovals(activity),
+        }
+      })
+    )
 
-    prGroups.sort(pr => pr.id).forEach(({ pullrequest, statuses, approvals }, index) => {
-      if (index === 0) {
-        console.log(chalk.dim('===================================='))
-      } else {
-        console.log('-------------------------------------')
-      }
+    prGroups
+      .sort((pr) => pr.id)
+      .forEach(({ pullrequest, statuses, approvals }, index) => {
+        if (index === 0) {
+          console.log(chalk.dim('===================================='))
+        } else {
+          console.log('-------------------------------------')
+        }
 
-      logPRHeader(pullrequest)
+        logPRHeader(pullrequest)
 
-      if (approvals.length) {
-        console.log(`${chalk.green('\u2713')} Approved by ${approvals.join(', ')}\n`)
-      } else {
-        console.log(`${chalk.red('\u2717')} Not yet approved \n`)
-      }
-      if (statuses && statuses.length) {
-        statuses.forEach(logPRStatus)
-      }
+        if (approvals.length) {
+          console.log(
+            `${chalk.green('\u2713')} Approved by ${approvals.join(', ')}\n`
+          )
+        } else {
+          console.log(`${chalk.red('\u2717')} Not yet approved \n`)
+        }
+        if (statuses && statuses.length) {
+          statuses.forEach(logPRStatus)
+        }
 
-      logPRLink(pullrequest.links.html.href)
-    })
+        logPRLink(pullrequest.links.html.href)
+      })
 
     return true
   } catch (e) {
+    spinner.fail('Whoops, something happened!')
     throw e
   }
 }
 
 async function promptPullRequestActions(pullrequest) {
+  const spinner = ora()
   try {
+    spinner.start()
     const actions = await getPullRequestActions(pullrequest)
+    spinner.stop()
     const { action } = await inquirer.prompt({
       type: 'list',
       name: 'action',
       message: 'What action would you like to perform?',
-      choices: Object.keys(actions).map(a => ({
+      choices: Object.keys(actions).map((a) => ({
         name: a,
         value: actions[a],
       })),
-      validate: val => !!val,
+      validate: (val) => !!val,
       when: () => true,
     })
 
     if (action) {
+      spinner.start()
       const data = await action()
+      spinner.succeed(`Done`)
       logPRLink(pullrequest.links.html.href)
       if (data && data.values) {
         // data.values.map((i) => console.log('i - ', JSON.stringify(i)))
@@ -303,25 +346,31 @@ async function promptPullRequestActions(pullrequest) {
 
     return null
   } catch (e) {
+    spinner.fail('Whoops, something happened')
     throw e
   }
 }
 
 async function promptPullRequestList() {
+  const spinner = ora()
   try {
+    await requireLogin()
+
+    spinner.start('Getting pull requests...')
     const list = await getPullRequests()
 
     if (list.length === 0) {
-      return console.log('No pull requests found')
+      spinner.succeed(`${chalk.green('All clear!')}`)
+      console.log(chalk.cyan('No pull requests available.\n'))
+      return true
     }
+    spinner.stop()
 
     const { pullrequest } = await inquirer.prompt({
       type: 'list',
       name: 'pullrequest',
       message: 'Select a pull request?',
-      choices: list.map(({
-        author, state, id, title, ...pr
-      }) => ({
+      choices: list.map(({ author, state, id, title, ...pr }) => ({
         name: `(${state}) #${id} by ${author.display_name} - ${title}`,
         value: {
           author,
@@ -331,14 +380,17 @@ async function promptPullRequestList() {
           ...pr,
         },
       })),
-      validate: val => !!val,
+      validate: (val) => !!val,
       when: () => true,
     })
 
+    spinner.start('Getting summary...')
     await renderPRSummary(pullrequest)
+    spinner.stop()
 
     return await promptPullRequestActions(pullrequest)
   } catch (e) {
+    spinner.stop()
     throw e
   }
 }
@@ -359,4 +411,3 @@ export function promptPullRequestCommand({ create, status }) {
 
   return promptPullRequestList()
 }
-
