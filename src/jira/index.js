@@ -1,13 +1,14 @@
 import chalk from 'chalk'
 import jira from './jira-api'
-import {
-  getJiraToken,
-  getJiraHost,
-} from '../config'
+import { getJiraToken, getJiraHost } from '../config'
 
 function displayIssues(res) {
   res.issues.forEach(({ key, fields }) => {
-    console.log(`${key} - ${chalk.yellow(fields.priority.name)} / ${chalk.cyan(fields.status.name)}`)
+    console.log(
+      `${key} - ${chalk.yellow(fields.priority.name)} / ${chalk.cyan(
+        fields.status.name
+      )}`
+    )
     console.log(`${fields.reporter.displayName}`)
     console.log('description', fields.description)
     console.log('timespent', fields.timespent)
