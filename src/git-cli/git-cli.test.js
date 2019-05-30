@@ -12,6 +12,7 @@ import {
 } from './git-cli'
 
 const MOCK_REMOTE_SSH_URL = 'git@github.com:billyxs/hiflow.git'
+const MOCK_REMOTE_SSH_URL_2 = 'ssh://git@github.com/billyxs/hiflow.git'
 const MOCK_REMOTE_HTTPS_URL = 'https://github.com/billyxs/hiflow.git'
 
 describe('getVersion()', () => {
@@ -45,6 +46,10 @@ describe('getRemoteUsernameFromURL()', () => {
 
   it('should equal billyxs', () => {
     expect(getRemoteUsernameFromURL(MOCK_REMOTE_HTTPS_URL)).toBe('billyxs')
+  })
+
+  it('should equal billyxs', () => {
+    expect(getRemoteUsernameFromURL(MOCK_REMOTE_SSH_URL_2)).toBe('billyxs')
   })
 })
 
