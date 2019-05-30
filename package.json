@@ -42,7 +42,7 @@
     "babel-preset-env": "^1.6.1",
     "chai": "^4.1.2",
     "cross-env": "^5.1.5",
-    "eslint": "^4.14.0",
+    "eslint": "^5.0.0",
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-config-prettier": "^4.1.0",
     "eslint-plugin-flowtype": "^2.32.1",
