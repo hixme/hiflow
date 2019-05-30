@@ -14,9 +14,18 @@ function handleResponse(response) {
 }
 
 function handleError(error) {
-  // console.log('error - ', JSON.stringify(error.response.data.error))
+  const {
+    response: { statusText, data },
+  } = error
+
+  // console.log('error - ', JSON.stringify(data.error))
   // console.log('error - ', error)
-  return error.response.data.error
+  //
+  if (statusText) {
+    console.log('Error status: ', chalk.yellow(statusText))
+  }
+
+  return data.error
 }
 
 export function bitbucketRequest(url, params = {}, method) {

@@ -30,7 +30,7 @@ decline the pull request.
 ## hi pr --status
 *requires bitbucket hosting*
 
-The status flag prints out an an overview of all pull requests available on
+The status flag prints out an overview of all pull requests available on
 the repository.
 
 
