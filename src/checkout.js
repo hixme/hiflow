@@ -1,10 +1,7 @@
 import inquirer from 'inquirer'
 import chalk from 'chalk'
 
-import {
-  getBranch,
-  createBranch,
-} from './git-cli'
+import { getBranch, createBranch } from './git-cli'
 
 async function promptCheckout() {
   const currentBranch = getBranch()
@@ -28,15 +25,9 @@ async function promptCheckout() {
         type: 'list',
         name: 'type',
         message: 'What type of branch?',
-        choices: [
-          'feature',
-          'improvement',
-          'fix',
-          'hotfix',
-          'release',
-        ],
+        choices: ['feature', 'improvement', 'fix', 'hotfix', 'release'],
         default: 'feature',
-        validate: val => !!val,
+        validate: (val) => !!val,
         when: () => true,
       })
 
@@ -47,11 +38,11 @@ async function promptCheckout() {
       type: 'input',
       name: 'issue',
       message: branchType === 'release' ? 'Version:' : 'Issue name:',
-      validate: val => !!val,
+      validate: (val) => !!val,
       when: () => true,
     })
 
-    console.log(chalk.green('Yes! I\'m excited about this.'))
+    console.log(chalk.green("Yes! I'm excited about this."))
     createBranch(`${branchType}/${issue}`)
 
     return { success: true }
@@ -62,4 +53,3 @@ async function promptCheckout() {
 export function promptCheckoutCommand() {
   return promptCheckout()
 }
-

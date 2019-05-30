@@ -1,23 +1,35 @@
 import { execSync } from 'child_process'
 
 export function getVersion() {
-  return execSync('git describe --tags --abbrev=0', { encoding: 'utf8' }).trim()
+  return execSync('git describe --tags --abbrev=0', {
+    encoding: 'utf8',
+  }).trim()
 }
 
 export function getBranch() {
-  return execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim()
+  return execSync('git rev-parse --abbrev-ref HEAD', {
+    encoding: 'utf8',
+  }).trim()
 }
 
 export function getRemoteURL() {
-  return execSync('git config --get remote.origin.url', { encoding: 'utf8' }).trim()
+  return execSync('git config --get remote.origin.url', {
+    encoding: 'utf8',
+  }).trim()
 }
 
 export function getRemoteUsernameFromURL(url) {
-  if (url.includes('https')) {
-    return url.split('/').reverse()[1].trim()
+  if (url.startsWith('https') || url.startsWith('ssh://')) {
+    return url
+      .split('/')
+      .reverse()[1]
+      .trim()
   }
 
-  return url.split(':')[1].split('/')[0].trim()
+  return url
+    .split(':')[1]
+    .split('/')[0]
+    .trim()
 }
 
 export function getRemoteUsername() {
