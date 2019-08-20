@@ -29,7 +29,7 @@
     "inquirer-chalk-pipe": "^1.2.0",
     "js-yaml": "^3.9.0",
     "ora": "^3.0.0",
-    "yargs": "^13.3.0"
+    "yargs": "^14.0.0"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
