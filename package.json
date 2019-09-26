@@ -28,7 +28,7 @@
     "inquirer": "^7.0.0",
     "inquirer-chalk-pipe": "^1.2.0",
     "js-yaml": "^3.9.0",
-    "ora": "^3.0.0",
+    "ora": "^4.0.0",
     "yargs": "^14.0.0"
   },
   "devDependencies": {
@@ -50,7 +50,7 @@
     "eslint-plugin-mocha": "^6.0.0",
     "eslint-plugin-promise": "^4.0.0",
     "eslint-plugin-standard": "^4.0.0",
-    "flow-bin": "^0.107.0",
+    "flow-bin": "^0.108.0",
     "jest": "^22.0.4",
     "jest-cli": "^23.0.0",
     "mocha": "^6.2.0",
