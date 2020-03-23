@@ -54,7 +54,7 @@
     "jest": "^22.0.4",
     "jest-cli": "^23.0.0",
     "mocha": "^7.0.1",
-    "prettier": "^1.14.2",
+    "prettier": "^2.0.2",
     "regenerator-runtime": "^0.13.3",
     "rimraf": "^3.0.0"
   },
