@@ -27,7 +27,7 @@
     "chalk": "^3.0.0",
     "inquirer": "^7.0.0",
     "inquirer-chalk-pipe": "^1.2.0",
-    "js-yaml": "^3.9.0",
+    "js-yaml": "^3.14.0",
     "ora": "^4.0.0",
     "yargs": "^15.0.1"
   },
